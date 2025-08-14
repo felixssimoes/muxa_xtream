@@ -47,6 +47,13 @@
 - PRs: include a clear description, linked issues, and test coverage where applicable. Screenshot logs only when relevant.
 - Checks: run `bash tool/verify.sh` locally; ensure format, analyze, and tests pass. Update `CHANGELOG.md` and bump `version` in `pubspec.yaml` for releases.
 
+## Plan Updates (DEVELOPMENT_PLAN.md)
+- Status rules:
+  - When a phase’s first task is completed, set that phase status to `in progress`.
+  - When all tasks in a phase are completed, set that phase status to `done`.
+- Always tick completed tasks with `- [x]` and leave remaining as `- [ ]`.
+- Update the plan in the same commit as the code/tests that fulfill a task.
+
 ## Security & Configuration Tips
 - Do not commit secrets or `.dart_tool/`. Respect `environment` constraints in `pubspec.yaml`.
 - Prefer relative imports within this package; avoid reaching outside `lib/`.
