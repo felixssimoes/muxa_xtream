@@ -19,10 +19,10 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Enable injectable transport for VM/Web
 - [x] Add unit tests (timeouts, retries, redirects, headers, redaction)
 
-## Phase 3 — Models & Parsing — Status: `todo`
+## Phase 3 — Models & Parsing — Status: `done`
 - [x] Implement models: user/server, categories, live/vod/series, details, EPG, capabilities
 - [x] Add resilient JSON parsing with UTC normalization
-- [ ] Add golden/fixture tests (null/variant fields, fork tolerance)
+- [x] Add golden/fixture tests (null/variant fields, fork tolerance)
 
 ## Phase 4 — URL Builders (no I/O) — Status: `todo`
 - [ ] Implement `liveUrl`, `vodUrl`, `seriesUrl` (default HLS; TS fallback)
