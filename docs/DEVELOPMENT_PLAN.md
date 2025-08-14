@@ -2,10 +2,10 @@
 
 This document tracks implementation progress for the muxa_xtream package. Phases carry a status label: `todo | in progress | done`. Tasks within a phase are simple checkboxes.
 
-## Phase 0 — Bootstrap — Status: `todo`
-- [ ] Scaffold package layout and exports
-- [ ] Add `tool/verify.sh` (pub get, format check, analyze, tests+coverage)
-- [ ] Run baseline verification (`bash tool/verify.sh`)
+## Phase 0 — Bootstrap — Status: `done`
+- [x] Scaffold package layout and exports
+- [x] Add `tool/verify.sh` (pub get, format check, analyze, tests+coverage)
+- [x] Run baseline verification (`bash tool/verify.sh`)
 
 ## Phase 1 — Public Surface — Status: `todo`
 - [ ] Implement core types (`XtreamPortal`, `XtreamCredentials`, `XtreamClientOptions`, `XtFeatures`)
