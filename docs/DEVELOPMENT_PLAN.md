@@ -7,11 +7,11 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Add `tool/verify.sh` (pub get, format check, analyze, tests+coverage)
 - [x] Run baseline verification (`bash tool/verify.sh`)
 
-## Phase 1 — Public Surface — Status: `todo`
-- [ ] Implement core types (`XtreamPortal`, `XtreamCredentials`, `XtreamClientOptions`, `XtFeatures`)
-- [ ] Implement error taxonomy (`XtError`, `XtAuthError`, `XtNetworkError`, `XtParseError`, `XtPortalBlockedError`, `XtUnsupportedError`)
-- [ ] Implement `XtreamLogger` and redaction utilities
-- [ ] Add unit tests for errors and redaction
+## Phase 1 — Public Surface — Status: `done`
+- [x] Implement core types (`XtreamPortal`, `XtreamCredentials`, `XtreamClientOptions`, `XtFeatures`)
+- [x] Implement error taxonomy (`XtError`, `XtAuthError`, `XtNetworkError`, `XtParseError`, `XtPortalBlockedError`, `XtUnsupportedError`)
+- [x] Implement `XtreamLogger` and redaction utilities
+- [x] Add unit tests for errors and redaction
 
 ## Phase 2 — HTTP Transport — Status: `todo`
 - [ ] Define `XtreamHttpAdapter` interface (GET/HEAD, headers, timeouts)
