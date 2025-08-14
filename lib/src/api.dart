@@ -4,5 +4,6 @@ export 'core/redaction.dart';
 export 'core/logger.dart';
 export 'http/adapter.dart';
 export 'http/default_adapter.dart';
+export 'http/adapter_factory.dart';
 
 const String muxaXtreamVersion = '0.0.1-dev';
