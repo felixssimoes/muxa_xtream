@@ -11,6 +11,10 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/to/develop-packages).
 -->
 
+## Repository Guidelines
+
+See [docs/AGENTS.md](docs/AGENTS.md) for contributor and development guidelines.
+
 TODO: Put a short description of the package here that helps potential users
 know whether this package might be useful for them.
 
