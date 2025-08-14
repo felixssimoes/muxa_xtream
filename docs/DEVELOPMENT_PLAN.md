@@ -13,11 +13,11 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Implement `XtreamLogger` and redaction utilities
 - [x] Add unit tests for errors and redaction
 
-## Phase 2 — HTTP Transport — Status: `in progress`
+## Phase 2 — HTTP Transport — Status: `done`
 - [x] Define `XtreamHttpAdapter` interface (GET/HEAD, headers, timeouts)
 - [x] Implement default adapter (retries for GET, jitter backoff, redirects, TLS/self-signed, header injection, redaction)
 - [x] Enable injectable transport for VM/Web
-- [ ] Add unit tests (timeouts, retries, redirects, headers, redaction)
+- [x] Add unit tests (timeouts, retries, redirects, headers, redaction)
 
 ## Phase 3 — Models & Parsing — Status: `todo`
 - [ ] Implement models: user/server, categories, live/vod/series, details, EPG, capabilities
