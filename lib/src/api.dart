@@ -14,5 +14,7 @@ export 'models/vod.dart';
 export 'models/series.dart';
 export 'models/epg.dart';
 export 'models/capabilities.dart';
+// URL builders (Phase 4)
+export 'url/builders.dart';
 
 const String muxaXtreamVersion = '0.0.1-dev';
