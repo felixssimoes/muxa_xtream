@@ -28,9 +28,24 @@
 - Run locally: `flutter test && flutter analyze && dart format --output=none --set-exit-if-changed .` before PRs.
 
 ## Commit & Pull Request Guidelines
-- Commits: follow Conventional Commits (e.g., `feat: add parser`, `fix: handle null input`, `test: add edge cases`). Keep messages imperative and scoped.
-- PRs: include a clear description, linked issues, and test coverage for changes. Screenshot logs only when relevant.
-- Checks: ensure tests pass, analyzer is clean, and code is formatted. Update `CHANGELOG.md` and bump `version` in `pubspec.yaml` for releases.
+- Commits: use Conventional Commits with structured, multi-line messages.
+  - Subject: `type(scope): concise summary` (imperative, max ~50 chars).
+  - Blank line after subject.
+  - Body: wrapped at ~72 cols; bullets for key changes; include “why” when helpful.
+  - Prefer small scopes (e.g., `core`, `http`, `docs`, `tool`).
+  - Examples:
+    - `chore(core): complete Phase 0 bootstrap`
+      
+      - Add `lib/src/api.dart` and export from `lib/muxa_xtream.dart`.
+      - Add `tool/verify.sh` (format, analyze, tests; fallbacks; auto-format).
+      - Remove template Calculator and example test.
+      - Mark Phase 0 done in `docs/DEVELOPMENT_PLAN.md`.
+    - `feat(models): add user/server and catalog types`
+      
+      - Implement parsing with null-tolerant converters.
+      - Add unit tests for required/optional fields.
+- PRs: include a clear description, linked issues, and test coverage where applicable. Screenshot logs only when relevant.
+- Checks: run `bash tool/verify.sh` locally; ensure format, analyze, and tests pass. Update `CHANGELOG.md` and bump `version` in `pubspec.yaml` for releases.
 
 ## Security & Configuration Tips
 - Do not commit secrets or `.dart_tool/`. Respect `environment` constraints in `pubspec.yaml`.
