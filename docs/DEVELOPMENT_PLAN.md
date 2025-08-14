@@ -20,7 +20,7 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Add unit tests (timeouts, retries, redirects, headers, redaction)
 
 ## Phase 3 — Models & Parsing — Status: `todo`
-- [ ] Implement models: user/server, categories, live/vod/series, details, EPG, capabilities
+- [x] Implement models: user/server, categories, live/vod/series, details, EPG, capabilities
 - [ ] Add resilient JSON parsing with UTC normalization
 - [ ] Add golden/fixture tests (null/variant fields, fork tolerance)
 
