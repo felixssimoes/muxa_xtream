@@ -38,8 +38,9 @@ void main() {
                       'end': now
                           .add(const Duration(hours: 1))
                           .toIso8601String(),
-                      'title': 'News',
-                      'description': 'daily news',
+                      // Base64("News") and Base64("daily news")
+                      'title': 'TmV3cw==',
+                      'description': 'ZGFpbHkgbmV3cw==',
                     },
                   ]
                 : [];
@@ -71,11 +72,12 @@ void main() {
     ),
   );
 
-  test('getShortEpg returns entries with epgChannelId', () async {
+  test('getShortEpg decodes base64 title/description', () async {
     final c = makeClient();
     final epg = await c.getShortEpg(epgChannelId: 'ch.a', limit: 1);
     expect(epg.length, 1);
     expect(epg.first.title, 'News');
+    expect(epg.first.description, 'daily news');
     expect(epg.first.startUtc.isUtc, isTrue);
   });
 

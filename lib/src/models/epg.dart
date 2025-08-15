@@ -24,8 +24,10 @@ class XtEpgEntry {
     final end = parseDateUtc(
       json['end'] ?? json['end_timestamp'] ?? json['end_time'],
     )!;
-    final title = (json['title'] ?? json['name'] ?? '') as String;
-    final desc = json['description'] as String? ?? json['desc'] as String?;
+    final rawTitle = (json['title'] ?? json['name'] ?? '') as String;
+    final rawDesc = json['description'] as String? ?? json['desc'] as String?;
+    final title = maybeDecodeBase64Utf8(rawTitle);
+    final desc = rawDesc == null ? null : maybeDecodeBase64Utf8(rawDesc);
     return XtEpgEntry(
       channelId: ch,
       startUtc: start,

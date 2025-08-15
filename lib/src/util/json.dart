@@ -1,4 +1,5 @@
 // Lightweight JSON helpers to tolerate variant types from Xtream-style portals.
+import 'dart:convert';
 
 int? asInt(dynamic v) {
   if (v == null) return null;
@@ -50,6 +51,44 @@ bool? asBool(dynamic v) {
 String? asString(dynamic v) {
   if (v == null) return null;
   return v.toString();
+}
+
+/// Heuristically decode Base64-encoded UTF-8 strings.
+/// Returns the original string if decoding fails or looks non-textual.
+String maybeDecodeBase64Utf8(String s) {
+  final trimmed = s.trim();
+  if (trimmed.isEmpty) return s;
+  // Quick filter: base64 alphabet and length multiple of 4
+  final base64Re = RegExp(r'^[A-Za-z0-9+/]+={0,2}$');
+  if (!base64Re.hasMatch(trimmed) || (trimmed.length % 4) != 0) {
+    return s;
+  }
+  try {
+    final decodedBytes = base64Decode(trimmed);
+    final text = utf8.decode(decodedBytes, allowMalformed: true);
+    if (text.isNotEmpty && _isMostlyTextual(text)) {
+      return text;
+    }
+  } catch (_) {
+    // fall through
+  }
+  return s;
+}
+
+bool _isMostlyTextual(String text) {
+  if (text.isEmpty) return false;
+  var printable = 0;
+  var total = 0;
+  for (final rune in text.runes) {
+    total++;
+    if (rune == 0x09 || rune == 0x0A || rune == 0x0D) {
+      printable++;
+      continue;
+    }
+    if (rune >= 0x20) printable++;
+  }
+  if (total == 0) return false;
+  return printable / total >= 0.9;
 }
 
 DateTime? parseDateUtc(dynamic v) {
