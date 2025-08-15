@@ -3,7 +3,7 @@
 ## Project Structure & Module Organization
 - `lib/`: Public package code (entrypoint: `lib/muxa_xtream.dart`). Keep APIs small and documented.
 - `test/`: Unit tests (e.g., `test/muxa_xtream_test.dart`). Mirror `lib/` structure; one `*_test.dart` per unit.
-- `docs/`: Design notes and requirements.
+- `doc/`: Design notes and requirements.
 - Root files: `pubspec.yaml` (deps, SDK), `analysis_options.yaml` (lints), `README.md`, `CHANGELOG.md`.
 
 ## Build, Test, and Development Commands
@@ -41,13 +41,13 @@
       - `git commit -F - <<'MSG'\\nfeat(url): add probe\\n\\n- Adds HEAD/Range probe\\n- Adds tests\\nMSG`
   - Examples:
     - `chore(core): complete Phase 0 bootstrap`
-      
+
       - Add `lib/src/api.dart` and export from `lib/muxa_xtream.dart`.
       - Add `tool/verify.sh` (format, analyze, tests; fallbacks; auto-format).
       - Remove template Calculator and example test.
-      - Mark Phase 0 done in `docs/DEVELOPMENT_PLAN.md`.
+  - Mark Phase 0 done in `doc/DEVELOPMENT_PLAN.md`.
     - `feat(models): add user/server and catalog types`
-      
+
       - Implement parsing with null-tolerant converters.
       - Add unit tests for required/optional fields.
 - PRs: include a clear description, linked issues, and test coverage where applicable. Screenshot logs only when relevant.

@@ -9,7 +9,7 @@ Thanks for contributing! Please follow these non-negotiable rules:
 
 Helpful docs:
 - Development guidelines: `AGENTS.md`
-- Plan and tasks: `docs/DEVELOPMENT_PLAN.md`
+- Plan and tasks: `doc/DEVELOPMENT_PLAN.md`
 
 ## Pre-commit Hook (recommended)
 
