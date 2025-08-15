@@ -29,8 +29,8 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Optional: probe helper (HEAD/Range) for extension inference
 - [x] Add unit tests for URL shapes and defaults
 
-## Phase 5 — Client Core — Status: `todo`
-- [ ] Implement account info: `getUserAndServerInfo`
+## Phase 5 — Client Core — Status: `in progress`
+- [x] Implement account info: `getUserAndServerInfo`
 - [ ] Implement catalogs: live/vod/series categories and lists
 - [ ] Implement details: `getVodInfo`, `getSeriesInfo`
 - [ ] Implement short EPG: `getShortEpg(streamId, limit)`

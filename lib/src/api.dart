@@ -5,6 +5,7 @@ export 'core/logger.dart';
 export 'http/adapter.dart';
 export 'http/default_adapter.dart';
 export 'http/adapter_factory.dart';
+export 'client.dart';
 // Models (Phase 3)
 export 'models/user.dart';
 export 'models/server.dart';
@@ -14,6 +15,7 @@ export 'models/vod.dart';
 export 'models/series.dart';
 export 'models/epg.dart';
 export 'models/capabilities.dart';
+export 'models/account.dart';
 // URL builders (Phase 4)
 export 'url/builders.dart';
 export 'url/probe.dart';
