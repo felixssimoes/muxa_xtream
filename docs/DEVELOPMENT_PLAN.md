@@ -47,8 +47,8 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Emit `XtXmltvEvent` stream
 - [x] Add tests (small fixtures; fetch)
 
-## Phase 8 — Reliability & Security — Status: `todo`
-- [ ] Wire cancellation/timeout plumbing across client
+## Phase 8 — Reliability & Security — Status: `in progress`
+- [x] Wire cancellation/timeout plumbing across client
 - [ ] Centralize redaction; ensure no secrets in errors/logs
 - [ ] Polish error classification and messages
 - [ ] Add tests (cancel propagation, timeout classification, redaction)

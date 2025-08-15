@@ -6,6 +6,7 @@ export 'http/adapter.dart';
 export 'http/default_adapter.dart';
 export 'http/adapter_factory.dart';
 export 'client.dart';
+export 'core/cancellation.dart';
 // Models (Phase 3)
 export 'models/user.dart';
 export 'models/server.dart';

@@ -78,10 +78,23 @@ void main(List<String> args) async {
         // Most portals work with streamId for short EPG. If a channel
         // returns empty, it may require epg_channel_id; our client will
         // retry internally when both are provided.
-        final epg = await client.getShortEpg(
-          streamId: stream.streamId,
-          limit: 2,
-        );
+        // Demo cancellation: allow early cancel via --cancel-after-ms
+        final cancelAfter = opts.cancelAfterMs;
+        final src = cancelAfter != null ? XtCancellationSource() : null;
+        if (cancelAfter != null) {
+          Timer(Duration(milliseconds: cancelAfter), src!.cancel);
+        }
+        List<XtEpgEntry> epg;
+        try {
+          epg = await client.getShortEpg(
+            streamId: stream.streamId,
+            limit: 2,
+            cancel: src?.token,
+          );
+        } on XtError catch (err) {
+          stderr.writeln('  EPG error: $err');
+          epg = const [];
+        }
         if (epg.isEmpty) {
           stdout.writeln('  No EPG data available');
         } else {
@@ -407,8 +420,8 @@ Future<HttpServer> _startMockServer() async {
 void _printUsage() {
   stdout.writeln('''
 Usage:
-  dart run example/main.dart --portal URL --user USER --pass PASS [--self-signed] [--probe URL]
-  dart run example/main.dart --mock [--probe URL]
+  dart run example/main.dart --portal URL --user USER --pass PASS [--self-signed] [--probe URL] [--cancel-after-ms N]
+  dart run example/main.dart --mock [--probe URL] [--cancel-after-ms N]
 
 Options:
   --portal URL      Xtream portal base URL (e.g., https://host:port)
@@ -418,6 +431,7 @@ Options:
   --probe URL       Probe a stream URL to suggest extension
   --mock            Start a local mock portal (user=alice, pass=secret)
   --stream-id N     Stream id to use in sample URLs (default: 1)
+  --cancel-after-ms N  Cancel the sample EPG request after N milliseconds
 
 Env vars (fallbacks): XT_PORTAL, XT_USER, XT_PASS
 ''');
@@ -431,6 +445,7 @@ class _CliOptions {
   final String? probeUrl;
   final bool mock;
   final int streamId;
+  final int? cancelAfterMs;
 
   _CliOptions({
     this.portal,
@@ -440,6 +455,7 @@ class _CliOptions {
     this.probeUrl,
     this.mock = false,
     this.streamId = 1,
+    this.cancelAfterMs,
   });
 
   _CliOptions copyWith({
@@ -450,6 +466,7 @@ class _CliOptions {
     String? probeUrl,
     bool? mock,
     int? streamId,
+    int? cancelAfterMs,
   }) => _CliOptions(
     portal: portal ?? this.portal,
     user: user ?? this.user,
@@ -458,6 +475,7 @@ class _CliOptions {
     probeUrl: probeUrl ?? this.probeUrl,
     mock: mock ?? this.mock,
     streamId: streamId ?? this.streamId,
+    cancelAfterMs: cancelAfterMs ?? this.cancelAfterMs,
   );
 
   static _CliOptions? parse(List<String> args, Map<String, String> env) {
@@ -495,6 +513,11 @@ class _CliOptions {
           if (index + 1 >= args.length) return null;
           final parsedStreamId = int.tryParse(args[++index]) ?? 1;
           opts = opts.copyWith(streamId: parsedStreamId);
+          break;
+        case '--cancel-after-ms':
+          if (index + 1 >= args.length) return null;
+          final ms = int.tryParse(args[++index]);
+          opts = opts.copyWith(cancelAfterMs: ms);
           break;
         default:
           return null;

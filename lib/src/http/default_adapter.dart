@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import '../core/errors.dart';
+import '../core/cancellation.dart';
 import '../core/redaction.dart';
 import 'adapter.dart';
 
@@ -85,6 +86,9 @@ class XtDefaultHttpAdapter implements XtHttpAdapter {
     final url = request.url;
     final timeout = request.timeout ?? options.receiveTimeout;
     try {
+      // Fast-fail if already cancelled
+      request.cancel?.throwIfCancelled();
+
       final req = await _client.openUrl(
         request.method == XtHttpMethod.head ? 'HEAD' : 'GET',
         url,
@@ -96,7 +100,19 @@ class XtDefaultHttpAdapter implements XtHttpAdapter {
       final headers = {...options.defaultHeaders, ...request.headers};
       headers.forEach((key, value) => req.headers.set(key, value));
 
-      final resp = await req.close().timeout(timeout);
+      // Tie cancellation to closing the request: if cancelled, destroy
+      // the underlying socket by closing the request with an error.
+      final closeFuture = req.close();
+      final guarded = request.cancel == null
+          ? closeFuture
+          : Future.any([
+              closeFuture,
+              request.cancel!.whenCancelled.then(
+                (_) => throw const XtCancelledError('Operation cancelled'),
+              ),
+            ]);
+
+      final resp = await guarded.timeout(timeout);
       final bytes = await resp.fold<BytesBuilder>(BytesBuilder(copy: false), (
         builder,
         data,
@@ -114,6 +130,12 @@ class XtDefaultHttpAdapter implements XtHttpAdapter {
         headers: hdrs,
         bodyBytes: body,
         url: resp.redirects.isNotEmpty ? resp.redirects.last.location : url,
+      );
+    } on XtCancelledError catch (err, st) {
+      throw XtNetworkError(
+        'Cancelled ${Redactor.redactUrl(url.toString())}',
+        cause: err,
+        stackTrace: st,
       );
     } on TimeoutException catch (err, st) {
       throw XtNetworkError(

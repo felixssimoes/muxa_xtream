@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../core/errors.dart';
+import '../core/cancellation.dart';
 
 /// HTTP method for Xtream requests.
 enum XtHttpMethod { get, head }
@@ -11,12 +12,14 @@ class XtRequest {
   final XtHttpMethod method;
   final Map<String, String> headers;
   final Duration? timeout; // Per-request override
+  final XtCancellationToken? cancel; // Cooperative cancellation
 
   const XtRequest({
     required this.url,
     this.method = XtHttpMethod.get,
     this.headers = const {},
     this.timeout,
+    this.cancel,
   });
 
   XtRequest copyWith({
@@ -24,11 +27,13 @@ class XtRequest {
     XtHttpMethod? method,
     Map<String, String>? headers,
     Duration? timeout,
+    XtCancellationToken? cancel,
   }) => XtRequest(
     url: url ?? this.url,
     method: method ?? this.method,
     headers: headers ?? this.headers,
     timeout: timeout ?? this.timeout,
+    cancel: cancel ?? this.cancel,
   );
 }
 

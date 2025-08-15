@@ -6,6 +6,7 @@ import 'core/models.dart';
 import 'core/redaction.dart';
 import 'http/adapter.dart';
 import 'http/adapter_factory.dart';
+import 'core/cancellation.dart';
 import 'models/account.dart';
 import 'models/category.dart';
 import 'models/live.dart';
@@ -39,7 +40,9 @@ class XtreamClient {
        http = http ?? createDefaultHttpAdapter();
 
   /// Fetches account and server info from `player_api.php`.
-  Future<XtUserAndServerInfo> getUserAndServerInfo() async {
+  Future<XtUserAndServerInfo> getUserAndServerInfo({
+    XtCancellationToken? cancel,
+  }) async {
     final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
       queryParameters: {'username': creds.username, 'password': creds.password},
     );
@@ -53,6 +56,7 @@ class XtreamClient {
           ...options.defaultHeaders,
         },
         timeout: options.receiveTimeout,
+        cancel: cancel,
       ),
     );
 
@@ -91,8 +95,10 @@ class XtreamClient {
   }
 
   /// Live categories.
-  Future<List<XtCategory>> getLiveCategories() async {
-    final data = await _getAction('get_live_categories');
+  Future<List<XtCategory>> getLiveCategories({
+    XtCancellationToken? cancel,
+  }) async {
+    final data = await _getAction('get_live_categories', cancel: cancel);
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
@@ -103,8 +109,10 @@ class XtreamClient {
   }
 
   /// VOD categories.
-  Future<List<XtCategory>> getVodCategories() async {
-    final data = await _getAction('get_vod_categories');
+  Future<List<XtCategory>> getVodCategories({
+    XtCancellationToken? cancel,
+  }) async {
+    final data = await _getAction('get_vod_categories', cancel: cancel);
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
@@ -115,8 +123,10 @@ class XtreamClient {
   }
 
   /// Series categories.
-  Future<List<XtCategory>> getSeriesCategories() async {
-    final data = await _getAction('get_series_categories');
+  Future<List<XtCategory>> getSeriesCategories({
+    XtCancellationToken? cancel,
+  }) async {
+    final data = await _getAction('get_series_categories', cancel: cancel);
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
@@ -127,10 +137,14 @@ class XtreamClient {
   }
 
   /// Live streams (optionally filtered by category id).
-  Future<List<XtLiveChannel>> getLiveStreams({String? categoryId}) async {
+  Future<List<XtLiveChannel>> getLiveStreams({
+    String? categoryId,
+    XtCancellationToken? cancel,
+  }) async {
     final data = await _getAction(
       'get_live_streams',
       extra: {if (categoryId != null) 'category_id': categoryId},
+      cancel: cancel,
     );
     if (data is List) {
       return data
@@ -142,10 +156,14 @@ class XtreamClient {
   }
 
   /// VOD streams (optionally filtered by category id).
-  Future<List<XtVodItem>> getVodStreams({String? categoryId}) async {
+  Future<List<XtVodItem>> getVodStreams({
+    String? categoryId,
+    XtCancellationToken? cancel,
+  }) async {
     final data = await _getAction(
       'get_vod_streams',
       extra: {if (categoryId != null) 'category_id': categoryId},
+      cancel: cancel,
     );
     if (data is List) {
       return data
@@ -157,10 +175,14 @@ class XtreamClient {
   }
 
   /// Series list (optionally filtered by category id).
-  Future<List<XtSeriesItem>> getSeries({String? categoryId}) async {
+  Future<List<XtSeriesItem>> getSeries({
+    String? categoryId,
+    XtCancellationToken? cancel,
+  }) async {
     final data = await _getAction(
       'get_series',
       extra: {if (categoryId != null) 'category_id': categoryId},
+      cancel: cancel,
     );
     if (data is List) {
       return data
@@ -172,8 +194,15 @@ class XtreamClient {
   }
 
   /// VOD details by stream id.
-  Future<XtVodDetails> getVodInfo(int vodId) async {
-    final data = await _getAction('get_vod_info', extra: {'vod_id': '$vodId'});
+  Future<XtVodDetails> getVodInfo(
+    int vodId, {
+    XtCancellationToken? cancel,
+  }) async {
+    final data = await _getAction(
+      'get_vod_info',
+      extra: {'vod_id': '$vodId'},
+      cancel: cancel,
+    );
     if (data is Map<String, dynamic>) {
       return XtVodDetails.fromJson(data);
     }
@@ -181,10 +210,14 @@ class XtreamClient {
   }
 
   /// Series details by series id.
-  Future<XtSeriesDetails> getSeriesInfo(int seriesId) async {
+  Future<XtSeriesDetails> getSeriesInfo(
+    int seriesId, {
+    XtCancellationToken? cancel,
+  }) async {
     final data = await _getAction(
       'get_series_info',
       extra: {'series_id': '$seriesId'},
+      cancel: cancel,
     );
     if (data is Map<String, dynamic>) {
       return XtSeriesDetails.fromJson(data);
@@ -199,6 +232,7 @@ class XtreamClient {
     int? streamId,
     String? epgChannelId,
     int limit = 10,
+    XtCancellationToken? cancel,
   }) async {
     if (streamId == null && (epgChannelId == null || epgChannelId.isEmpty)) {
       throw const XtUnsupportedError(
@@ -207,7 +241,11 @@ class XtreamClient {
     }
 
     Future<List<XtEpgEntry>> fetchEpg(Map<String, String> params) async {
-      final data = await _getAction('get_short_epg', extra: params);
+      final data = await _getAction(
+        'get_short_epg',
+        extra: params,
+        cancel: cancel,
+      );
       List? list;
       if (data is List) {
         list = data;
@@ -242,6 +280,7 @@ class XtreamClient {
   Future<dynamic> _getAction(
     String action, {
     Map<String, String>? extra,
+    XtCancellationToken? cancel,
   }) async {
     final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
       queryParameters: {
@@ -261,6 +300,7 @@ class XtreamClient {
           'Accept': 'application/json',
         },
         timeout: options.receiveTimeout,
+        cancel: cancel,
       ),
     );
     if (!res.ok) {
@@ -282,7 +322,7 @@ class XtreamClient {
   }
 
   /// Ping the portal by calling player_api.php (auth check) and measuring latency.
-  Future<XtHealth> ping() async {
+  Future<XtHealth> ping({XtCancellationToken? cancel}) async {
     final started = DateTime.now();
     final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
       queryParameters: {'username': creds.username, 'password': creds.password},
@@ -297,6 +337,7 @@ class XtreamClient {
           'Accept': 'application/json',
         },
         timeout: options.receiveTimeout,
+        cancel: cancel,
       ),
     );
     final latency = DateTime.now().difference(started);
@@ -337,7 +378,10 @@ class XtreamClient {
   /// Fetches an M3U playlist from `get.php` and returns a stream of entries.
   /// This is optional and depends on server support.
   /// [output] controls the stream file extension preference: 'hls' or 'ts'.
-  Stream<XtM3uEntry> getM3u({String output = 'hls'}) async* {
+  Stream<XtM3uEntry> getM3u({
+    String output = 'hls',
+    XtCancellationToken? cancel,
+  }) async* {
     final url = _buildPath(portal.baseUri, ['get.php']).replace(
       queryParameters: {
         'username': creds.username,
@@ -357,6 +401,7 @@ class XtreamClient {
               'application/x-mpegURL, audio/mpegurl, text/plain;q=0.5, */*;q=0.1',
         },
         timeout: options.receiveTimeout,
+        cancel: cancel,
       ),
     );
     if (!res.ok) {
@@ -373,7 +418,7 @@ class XtreamClient {
   /// Fetches XMLTV feed from `xmltv.php` and returns a stream of events.
   /// This is optional and depends on server support. The event stream yields
   /// channels and programmes as they are parsed.
-  Stream<XtXmltvEvent> getXmltv() async* {
+  Stream<XtXmltvEvent> getXmltv({XtCancellationToken? cancel}) async* {
     final url = _buildPath(portal.baseUri, ['xmltv.php']).replace(
       queryParameters: {'username': creds.username, 'password': creds.password},
     );
@@ -387,6 +432,7 @@ class XtreamClient {
           'Accept': 'application/xml, text/xml;q=0.9, */*;q=0.1',
         },
         timeout: options.receiveTimeout,
+        cancel: cancel,
       ),
     );
     if (!res.ok) {
