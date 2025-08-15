@@ -20,5 +20,8 @@ export 'models/account.dart';
 // URL builders (Phase 4)
 export 'url/builders.dart';
 export 'url/probe.dart';
+// Optional M3U (Phase 6)
+export 'models/m3u.dart';
+export 'm3u/parser.dart';
 
 const String muxaXtreamVersion = '0.0.1-dev';

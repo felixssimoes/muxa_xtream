@@ -16,6 +16,8 @@ import 'models/capabilities.dart';
 import 'models/health.dart';
 import 'models/server.dart';
 import 'models/user.dart';
+import 'm3u/parser.dart';
+import 'models/m3u.dart';
 
 /// Minimal client focusing on account/server info.
 class XtreamClient {
@@ -328,6 +330,42 @@ class XtreamClient {
       // Fall through to defaults below
     }
     return const XtCapabilities();
+  }
+
+  /// Fetches an M3U playlist from `get.php` and returns a stream of entries.
+  /// This is optional and depends on server support.
+  /// [output] controls the stream file extension preference: 'hls' or 'ts'.
+  Stream<XtM3uEntry> getM3u({String output = 'hls'}) async* {
+    final url = _buildPath(portal.baseUri, ['get.php']).replace(
+      queryParameters: {
+        'username': creds.username,
+        'password': creds.password,
+        'type': 'm3u_plus',
+        'output': output,
+      },
+    );
+    logger?.info('GET ${Redactor.redactUrl(url.toString())}');
+    final res = await http.get(
+      XtRequest(
+        url: url,
+        headers: {
+          if (options.userAgent != null) 'User-Agent': options.userAgent!,
+          ...options.defaultHeaders,
+          'Accept':
+              'application/x-mpegURL, audio/mpegurl, text/plain;q=0.5, */*;q=0.1',
+        },
+        timeout: options.receiveTimeout,
+      ),
+    );
+    if (!res.ok) {
+      final code = res.statusCode;
+      final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
+      if (code == 401 || code == 403) throw XtAuthError(msg);
+      if (code == 451) throw XtPortalBlockedError(msg);
+      throw XtNetworkError(msg);
+    }
+    // Stream-parse the playlist
+    yield* parseM3u(Stream<List<int>>.value(res.bodyBytes));
   }
 }
 

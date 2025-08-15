@@ -37,10 +37,10 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Implement `ping()` and `capabilities()`
 - [x] Add unit/contract tests (success/failure: 401/403/blocked/network/HTML error; large lists)
 
-## Phase 6 — Optional M3U — Status: `todo`
-- [ ] Implement `get.php` fetch and streaming parser
-- [ ] Map entries to models where feasible
-- [ ] Add tests (variants, malformed lines)
+## Phase 6 — Optional M3U — Status: `done`
+- [x] Implement `get.php` fetch and streaming parser
+- [x] Map entries to models where feasible
+- [x] Add tests (variants, malformed lines)
 
 ## Phase 7 — Optional XMLTV — Status: `todo`
 - [ ] Implement isolate-based SAX parser with streaming, cancellation, backpressure

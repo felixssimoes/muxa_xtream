@@ -165,6 +165,20 @@ void main(List<String> args) async {
     ..writeln('  vod:    $vod')
     ..writeln('  series: $series');
 
+  // Demo M3U fetch and parse (optional)
+  try {
+    stdout.writeln('Fetching M3U playlist (first 2 entries)...');
+    var count = 0;
+    await for (final entry in client.getM3u().take(2)) {
+      count++;
+      final group = entry.groupTitle ?? '-';
+      stdout.writeln('  M3U #$count: [$group] ${entry.name} -> ${entry.url}');
+    }
+    if (count == 0) stdout.writeln('  No M3U entries available');
+  } on XtError catch (err) {
+    stderr.writeln('M3U error: $err');
+  }
+
   if (opts.probeUrl != null) {
     final ext = await suggestStreamExtension(http, Uri.parse(opts.probeUrl!));
     stdout.writeln('Probed stream extension: .$ext');
