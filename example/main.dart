@@ -179,6 +179,30 @@ void main(List<String> args) async {
     stderr.writeln('M3U error: $err');
   }
 
+  // Demo XMLTV fetch and parse (optional)
+  try {
+    stdout.writeln('Fetching XMLTV (first 3 events)...');
+    var chSeen = 0;
+    var prSeen = 0;
+    await for (final ev in client.getXmltv()) {
+      if (ev is XtXmltvChannel && chSeen < 2) {
+        chSeen++;
+        stdout.writeln(
+          '  XMLTV channel: id=${ev.id} name=${ev.displayName ?? '-'} icon=${ev.iconUrl ?? '-'}',
+        );
+      } else if (ev is XtXmltvProgramme && prSeen < 1) {
+        prSeen++;
+        stdout.writeln(
+          '  XMLTV programme: ch=${ev.channelId} ${ev.start.toIso8601String()} \'${ev.title ?? '-'}\'',
+        );
+      }
+      if (chSeen + prSeen >= 3) break;
+    }
+    if (chSeen + prSeen == 0) stdout.writeln('  No XMLTV events available');
+  } on XtError catch (err) {
+    stderr.writeln('XMLTV error: $err');
+  }
+
   if (opts.probeUrl != null) {
     final ext = await suggestStreamExtension(http, Uri.parse(opts.probeUrl!));
     stdout.writeln('Probed stream extension: .$ext');
@@ -317,6 +341,43 @@ Future<HttpServer> _startMockServer() async {
           req.response.statusCode = 200;
           req.response.headers.set('Content-Type', 'application/json');
           req.response.write(jsonEncode(bodyObj));
+          await req.response.close();
+        } else if (path.endsWith('/get.php')) {
+          final qp = req.uri.queryParameters;
+          if (qp['username'] != 'alice' || qp['password'] != 'secret') {
+            req.response.statusCode = 403;
+            await req.response.close();
+            continue;
+          }
+          final base = Uri.parse('http://localhost:${server.port}');
+          final playlist =
+              '#EXTM3U\n'
+              '#EXTINF:-1 tvg-id="ch1" group-title="News", Channel 1\n'
+              '${base.replace(path: '/live/1.m3u8')}\n'
+              '#EXTINF:-1, Channel 2\n'
+              '${base.replace(path: '/live/2.ts')}\n';
+          req.response.statusCode = 200;
+          req.response.headers.set('Content-Type', 'application/x-mpegurl');
+          req.response.write(playlist);
+          await req.response.close();
+        } else if (path.endsWith('/xmltv.php')) {
+          final qp = req.uri.queryParameters;
+          if (qp['username'] != 'alice' || qp['password'] != 'secret') {
+            req.response.statusCode = 403;
+            await req.response.close();
+            continue;
+          }
+          final xml =
+              '<?xml version="1.0" encoding="UTF-8"?>\n'
+              '<tv>\n'
+              '  <channel id="ch1"><display-name>One</display-name></channel>\n'
+              '  <programme start="20240101120000 +0000" channel="ch1">\n'
+              '    <title>News</title>\n'
+              '  </programme>\n'
+              '</tv>';
+          req.response.statusCode = 200;
+          req.response.headers.set('Content-Type', 'application/xml');
+          req.response.write(xml);
           await req.response.close();
         } else if (path == '/hls.m3u8') {
           req.response.headers.set(

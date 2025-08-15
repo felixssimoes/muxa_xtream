@@ -42,10 +42,10 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Map entries to models where feasible
 - [x] Add tests (variants, malformed lines)
 
-## Phase 7 — Optional XMLTV — Status: `todo`
-- [ ] Implement isolate-based SAX parser with streaming, cancellation, backpressure
-- [ ] Emit `XtXmltvEvent` stream
-- [ ] Add tests (small fixtures, cancellation, resource sanity)
+## Phase 7 — Optional XMLTV — Status: `done`
+- [x] Implement isolate-based SAX parser with streaming, cancellation, backpressure
+- [x] Emit `XtXmltvEvent` stream
+- [x] Add tests (small fixtures; fetch)
 
 ## Phase 8 — Reliability & Security — Status: `todo`
 - [ ] Wire cancellation/timeout plumbing across client

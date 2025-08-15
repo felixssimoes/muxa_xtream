@@ -18,6 +18,8 @@ import 'models/server.dart';
 import 'models/user.dart';
 import 'm3u/parser.dart';
 import 'models/m3u.dart';
+import 'models/xmltv.dart';
+import 'xmltv/parser.dart';
 
 /// Minimal client focusing on account/server info.
 class XtreamClient {
@@ -366,6 +368,35 @@ class XtreamClient {
     }
     // Stream-parse the playlist
     yield* parseM3u(Stream<List<int>>.value(res.bodyBytes));
+  }
+
+  /// Fetches XMLTV feed from `xmltv.php` and returns a stream of events.
+  /// This is optional and depends on server support. The event stream yields
+  /// channels and programmes as they are parsed.
+  Stream<XtXmltvEvent> getXmltv() async* {
+    final url = _buildPath(portal.baseUri, ['xmltv.php']).replace(
+      queryParameters: {'username': creds.username, 'password': creds.password},
+    );
+    logger?.info('GET ${Redactor.redactUrl(url.toString())}');
+    final res = await http.get(
+      XtRequest(
+        url: url,
+        headers: {
+          if (options.userAgent != null) 'User-Agent': options.userAgent!,
+          ...options.defaultHeaders,
+          'Accept': 'application/xml, text/xml;q=0.9, */*;q=0.1',
+        },
+        timeout: options.receiveTimeout,
+      ),
+    );
+    if (!res.ok) {
+      final code = res.statusCode;
+      final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
+      if (code == 401 || code == 403) throw XtAuthError(msg);
+      if (code == 451) throw XtPortalBlockedError(msg);
+      throw XtNetworkError(msg);
+    }
+    yield* parseXmltv(Stream<List<int>>.value(res.bodyBytes));
   }
 }
 

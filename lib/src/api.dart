@@ -23,5 +23,8 @@ export 'url/probe.dart';
 // Optional M3U (Phase 6)
 export 'models/m3u.dart';
 export 'm3u/parser.dart';
+// Optional XMLTV (Phase 7)
+export 'models/xmltv.dart';
+export 'xmltv/parser.dart';
 
 const String muxaXtreamVersion = '0.0.1-dev';
