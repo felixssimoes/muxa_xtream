@@ -24,10 +24,10 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Add resilient JSON parsing with UTC normalization
 - [x] Add golden/fixture tests (null/variant fields, fork tolerance)
 
-## Phase 4 — URL Builders (no I/O) — Status: `in progress`
+## Phase 4 — URL Builders (no I/O) — Status: `done`
 - [x] Implement `liveUrl`, `vodUrl`, `seriesUrl` (default HLS; TS fallback)
-- [ ] Optional: probe helper (HEAD/Range) for extension inference
-- [ ] Add unit tests for URL shapes and defaults
+- [x] Optional: probe helper (HEAD/Range) for extension inference
+- [x] Add unit tests for URL shapes and defaults
 
 ## Phase 5 — Client Core — Status: `todo`
 - [ ] Implement account info: `getUserAndServerInfo`
