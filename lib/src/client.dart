@@ -11,6 +11,7 @@ import 'models/category.dart';
 import 'models/live.dart';
 import 'models/vod.dart';
 import 'models/series.dart';
+import 'models/epg.dart';
 import 'models/server.dart';
 import 'models/user.dart';
 
@@ -183,6 +184,30 @@ class XtreamClient {
       return XtSeriesDetails.fromJson(data);
     }
     throw const XtParseError('Expected object for series details');
+  }
+
+  /// Short EPG for a live stream.
+  Future<List<XtEpgEntry>> getShortEpg({
+    required int streamId,
+    int limit = 10,
+  }) async {
+    final data = await _getAction(
+      'get_short_epg',
+      extra: {'stream_id': '$streamId', 'limit': '$limit'},
+    );
+    List? list;
+    if (data is List) {
+      list = data;
+    } else if (data is Map<String, dynamic>) {
+      list = data['epg_listings'] ?? data['listings'] ?? data['results'];
+    }
+    if (list is List) {
+      return list
+          .whereType<Map<String, dynamic>>()
+          .map(XtEpgEntry.fromJson)
+          .toList(growable: false);
+    }
+    throw const XtParseError('Expected list for short EPG');
   }
 
   Future<dynamic> _getAction(

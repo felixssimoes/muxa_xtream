@@ -76,6 +76,12 @@ void main(List<String> args) async {
         stdout.writeln(
           'First live in ${liveCats.first.name}: \'${s.name}\' (id=${s.streamId})',
         );
+        final epg = await client.getShortEpg(streamId: s.streamId, limit: 2);
+        for (final e in epg) {
+          stdout.writeln(
+            '  EPG: ${e.startUtc.toIso8601String()} - ${e.endUtc.toIso8601String()} \'${e.title}\'',
+          );
+        }
       }
     }
 
@@ -219,6 +225,18 @@ Future<HttpServer> _startMockServer() async {
                 final cat = qp['category_id'] ?? '20';
                 bodyObj = [
                   {'series_id': '5', 'name': 'Show', 'category_id': cat},
+                ];
+                break;
+              case 'get_short_epg':
+                final now = DateTime.now().toUtc();
+                bodyObj = [
+                  {
+                    'epg_channel_id': 'ch.a',
+                    'start': now.toIso8601String(),
+                    'end': now.add(const Duration(hours: 1)).toIso8601String(),
+                    'title': 'News',
+                    'description': 'daily news',
+                  },
                 ];
                 break;
               case 'get_vod_info':
