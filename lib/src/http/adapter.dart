@@ -14,6 +14,8 @@ class XtRequest {
   final Duration? timeout; // Per-request override
   final XtCancellationToken? cancel; // Cooperative cancellation
 
+  /// Create a request for the adapter. Use [timeout] to override adapter
+  /// defaults and [cancel] to support cooperative cancellation.
   const XtRequest({
     required this.url,
     this.method = XtHttpMethod.get,
@@ -22,6 +24,7 @@ class XtRequest {
     this.cancel,
   });
 
+  /// Returns a copy with selected fields replaced.
   XtRequest copyWith({
     Uri? url,
     XtHttpMethod? method,
@@ -51,6 +54,7 @@ class XtResponse {
     required this.url,
   });
 
+  /// True when [statusCode] is in the 2xx range.
   bool get ok => statusCode >= 200 && statusCode < 300;
 }
 
@@ -62,6 +66,9 @@ class XtResponse {
 /// - Throw [XtNetworkError] for connectivity/timeouts/TLS issues
 /// - Avoid leaking secrets in thrown messages (use redaction internally)
 abstract class XtHttpAdapter {
+  /// Execute a GET request.
   Future<XtResponse> get(XtRequest request);
+
+  /// Execute a HEAD request.
   Future<XtResponse> head(XtRequest request);
 }

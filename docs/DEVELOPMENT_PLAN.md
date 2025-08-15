@@ -53,9 +53,9 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Polish error classification and messages
 - [x] Add tests (cancel propagation, timeout classification, redaction)
 
-## Phase 9 — Documentation — Status: `in progress`
+## Phase 9 — Documentation — Status: `done`
 - [x] Update README (quick start, examples, capability notes)
-- [ ] Add dartdoc comments for public API
+- [x] Add dartdoc comments for public API
 - [x] Add Troubleshooting and Security Notes; link `AGENTS.md`
 
 ## Phase 10 — Tooling & CI — Status: `todo`

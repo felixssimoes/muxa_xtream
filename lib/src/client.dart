@@ -22,7 +22,7 @@ import 'models/m3u.dart';
 import 'models/xmltv.dart';
 import 'xmltv/parser.dart';
 
-/// Minimal client focusing on account/server info.
+/// High-level Xtream client for account, catalogs, details, diagnostics, and helpers.
 class XtreamClient {
   final XtreamPortal portal;
   final XtreamCredentials creds;

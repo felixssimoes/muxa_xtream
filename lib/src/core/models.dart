@@ -4,8 +4,10 @@ import 'redaction.dart';
 class XtreamPortal {
   final Uri baseUri;
 
+  /// Create a portal from a [baseUri].
   XtreamPortal(this.baseUri);
 
+  /// Parse and normalize a portal URL. Missing scheme defaults to `https://`.
   factory XtreamPortal.parse(String url) => XtreamPortal(_normalize(url));
 
   static Uri _normalize(String url) {
@@ -28,7 +30,10 @@ class XtreamCredentials {
 
   const XtreamCredentials({required this.username, required this.password});
 
+  /// Redacted username for logs.
   String get maskedUsername => Redactor.mask(username);
+
+  /// Redacted password token for logs.
   String get maskedPassword => Redactor.mask(password);
 
   @override
@@ -43,6 +48,7 @@ class XtreamClientOptions {
   final String? userAgent;
   final Map<String, String> defaultHeaders;
 
+  /// Construct client options with sensible defaults.
   const XtreamClientOptions({
     this.connectTimeout = const Duration(seconds: 10),
     this.receiveTimeout = const Duration(seconds: 30),
@@ -58,6 +64,7 @@ class XtFeatures {
 
   const XtFeatures({this.m3u = false, this.xmltv = false});
 
+  /// Return a copy with selected flags updated.
   XtFeatures copyWith({bool? m3u, bool? xmltv}) =>
       XtFeatures(m3u: m3u ?? this.m3u, xmltv: xmltv ?? this.xmltv);
 }

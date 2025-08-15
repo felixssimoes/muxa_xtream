@@ -1,3 +1,4 @@
+/// Utilities to mask or redact sensitive data in logs and errors.
 class Redactor {
   static const _mask = 'REDACTED';
 

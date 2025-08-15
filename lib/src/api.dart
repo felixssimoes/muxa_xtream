@@ -1,3 +1,6 @@
+// Public API barrel for the muxa_xtream package.
+// Exports client, models, errors, URL builders, and optional M3U/XMLTV helpers.
+
 export 'core/models.dart';
 export 'core/errors.dart';
 export 'core/redaction.dart';
@@ -28,4 +31,5 @@ export 'm3u/parser.dart';
 export 'models/xmltv.dart';
 export 'xmltv/parser.dart';
 
+/// Package version string.
 const String muxaXtreamVersion = '0.0.1-dev';
