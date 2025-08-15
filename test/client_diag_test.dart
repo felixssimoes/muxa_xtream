@@ -75,16 +75,16 @@ void main() {
   );
 
   test('ping returns ok with latency', () async {
-    final c = makeClient();
-    final h = await c.ping();
-    expect(h.ok, isTrue);
-    expect(h.statusCode, 200);
-    expect(h.latency, isNotNull);
+    final client = makeClient();
+    final health = await client.ping();
+    expect(health.ok, isTrue);
+    expect(health.statusCode, 200);
+    expect(health.latency, isNotNull);
   });
 
   test('capabilities returns flags', () async {
-    final c = makeClient();
-    final caps = await c.capabilities();
+    final client = makeClient();
+    final caps = await client.capabilities();
     expect(caps.supportsShortEpg, isTrue);
     expect(caps.supportsExtendedEpg, isFalse);
     expect(caps.supportsM3u, isTrue);
@@ -92,7 +92,7 @@ void main() {
   });
 
   test('ping with bad creds throws auth error', () async {
-    final c = makeClient(pass: 'nope');
-    expect(() => c.ping(), throwsA(isA<XtAuthError>()));
+    final client = makeClient(pass: 'nope');
+    expect(() => client.ping(), throwsA(isA<XtAuthError>()));
   });
 }

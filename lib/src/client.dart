@@ -77,10 +77,10 @@ class XtreamClient {
       return XtUserAndServerInfo(user: user, server: server);
     } on XtError {
       rethrow;
-    } catch (e, st) {
+    } catch (err, st) {
       throw XtParseError(
         'Invalid JSON from ${Redactor.redactUrl(url.toString())}',
-        cause: e,
+        cause: err,
         stackTrace: st,
       );
     }
@@ -92,7 +92,7 @@ class XtreamClient {
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
-          .map((e) => XtCategory.fromJson(e, kind: 'live'))
+          .map((json) => XtCategory.fromJson(json, kind: 'live'))
           .toList(growable: false);
     }
     throw const XtParseError('Expected list for live categories');
@@ -104,7 +104,7 @@ class XtreamClient {
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
-          .map((e) => XtCategory.fromJson(e, kind: 'vod'))
+          .map((json) => XtCategory.fromJson(json, kind: 'vod'))
           .toList(growable: false);
     }
     throw const XtParseError('Expected list for VOD categories');
@@ -116,7 +116,7 @@ class XtreamClient {
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
-          .map((e) => XtCategory.fromJson(e, kind: 'series'))
+          .map((json) => XtCategory.fromJson(json, kind: 'series'))
           .toList(growable: false);
     }
     throw const XtParseError('Expected list for series categories');
@@ -202,8 +202,8 @@ class XtreamClient {
       );
     }
 
-    Future<List<XtEpgEntry>> fetchEpg(Map<String, String> q) async {
-      final data = await _getAction('get_short_epg', extra: q);
+    Future<List<XtEpgEntry>> fetchEpg(Map<String, String> params) async {
+      final data = await _getAction('get_short_epg', extra: params);
       List? list;
       if (data is List) {
         list = data;
@@ -268,10 +268,10 @@ class XtreamClient {
     }
     try {
       return jsonDecode(utf8.decode(res.bodyBytes));
-    } catch (e, st) {
+    } catch (err, st) {
       throw XtParseError(
         'Invalid JSON from ${Redactor.redactUrl(url.toString())}',
-        cause: e,
+        cause: err,
         stackTrace: st,
       );
     }
@@ -333,7 +333,7 @@ class XtreamClient {
 
 Uri _buildPath(Uri base, List<String> add) {
   final segs = <String>[
-    ...base.pathSegments.where((s) => s.isNotEmpty),
+    ...base.pathSegments.where((segment) => segment.isNotEmpty),
     ...add,
   ];
   return base.replace(path: segs.join('/'));

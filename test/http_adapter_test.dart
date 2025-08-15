@@ -107,11 +107,11 @@ void main() {
           XtRequest(url: slow, timeout: const Duration(milliseconds: 50)),
         );
         fail('expected timeout');
-      } on XtNetworkError catch (e) {
-        final s = e.toString();
-        expect(s, contains('REDACTED'));
-        expect(s, isNot(contains('alice')));
-        expect(s, isNot(contains('secret')));
+      } on XtNetworkError catch (err) {
+        final msg = err.toString();
+        expect(msg, contains('REDACTED'));
+        expect(msg, isNot(contains('alice')));
+        expect(msg, isNot(contains('secret')));
       }
     });
   });

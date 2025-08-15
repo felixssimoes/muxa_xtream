@@ -24,9 +24,9 @@ class Redactor {
   static Uri redactUri(Uri uri) {
     final qp = Map<String, String>.from(uri.queryParameters);
     bool changed = false;
-    qp.forEach((k, v) {
-      if (_sensitiveQueryKeys.contains(k.toLowerCase())) {
-        qp[k] = _mask;
+    qp.forEach((key, value) {
+      if (_sensitiveQueryKeys.contains(key.toLowerCase())) {
+        qp[key] = _mask;
         changed = true;
       }
     });
@@ -40,7 +40,7 @@ class Redactor {
       return redactUri(uri).toString();
     } catch (_) {
       // Best-effort string redaction.
-      var s = url;
+      var str = url;
       final pairs = [
         RegExp(r'(username=)([^&\s]+)', caseSensitive: false),
         RegExp(r'(password=)([^&\s]+)', caseSensitive: false),
@@ -50,24 +50,25 @@ class Redactor {
         RegExp(r'(key=)([^&\s]+)', caseSensitive: false),
       ];
       for (final re in pairs) {
-        s = s.replaceAllMapped(re, (m) => '${m.group(1)}$_mask');
+        str = str.replaceAllMapped(re, (match) => '${match.group(1)}$_mask');
       }
-      return s;
+      return str;
     }
   }
 
   static Map<String, String> redactHeaders(Map<String, String> headers) {
     final out = <String, String>{};
-    headers.forEach((k, v) {
-      final kl = k.toLowerCase();
+    headers.forEach((key, value) {
+      final kl = key.toLowerCase();
       if (_sensitiveHeaders.contains(kl)) {
-        if (kl == 'authorization' && v.toLowerCase().startsWith('bearer ')) {
-          out[k] = 'Bearer $_mask';
+        if (kl == 'authorization' &&
+            value.toLowerCase().startsWith('bearer ')) {
+          out[key] = 'Bearer $_mask';
         } else {
-          out[k] = _mask;
+          out[key] = _mask;
         }
       } else {
-        out[k] = v;
+        out[key] = value;
       }
     });
     return out;
@@ -75,26 +76,26 @@ class Redactor {
 
   /// Redact common secret patterns in free-form text.
   static String redactText(String text) {
-    var s = text;
+    var str = text;
     // query params in text
     final anyKey = RegExp(
       r'((?:username|password|token|access_token|auth|key)=)([^&\s]+)',
       caseSensitive: false,
     );
-    s = s.replaceAllMapped(anyKey, (m) => '${m.group(1)}$_mask');
+    str = str.replaceAllMapped(anyKey, (match) => '${match.group(1)}$_mask');
     // Authorization: Bearer <token>
-    s = s.replaceAllMapped(
+    str = str.replaceAllMapped(
       RegExp(
         r'(Authorization\s*:\s*Bearer\s+)([^\s\r\n]+)',
         caseSensitive: false,
       ),
-      (m) => '${m.group(1)}$_mask',
+      (match) => '${match.group(1)}$_mask',
     );
     // URLs with credentials in text
-    s = s.replaceAllMapped(
+    str = str.replaceAllMapped(
       RegExp(r'https?://[^\s)]+'),
-      (m) => redactUrl(m.group(0)!),
+      (match) => redactUrl(match.group(0)!),
     );
-    return s;
+    return str;
   }
 }

@@ -103,9 +103,9 @@ class XtSeriesDetails {
         final seasonNum = int.tryParse(seasonKey) ?? 0;
         final eps = <XtEpisode>[];
         if (list is List) {
-          for (final e in list) {
-            if (e is Map<String, dynamic>) {
-              eps.add(XtEpisode.fromJson(e));
+          for (final entry in list) {
+            if (entry is Map<String, dynamic>) {
+              eps.add(XtEpisode.fromJson(entry));
             }
           }
         }

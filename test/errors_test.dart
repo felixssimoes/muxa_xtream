@@ -4,14 +4,14 @@ import 'package:muxa_xtream/muxa_xtream.dart';
 void main() {
   group('XtError', () {
     test('toString includes type and redacts secrets', () {
-      final msg =
+      final rawMessage =
           'Login failed for http://e.com/player_api.php?username=alice&password=secret';
-      final err = XtAuthError(msg);
-      final s = err.toString();
-      expect(s, contains('XtAuthError'));
-      expect(s, isNot(contains('alice')));
-      expect(s, isNot(contains('secret')));
-      expect(s, contains('password=REDACTED'));
+      final err = XtAuthError(rawMessage);
+      final msg = err.toString();
+      expect(msg, contains('XtAuthError'));
+      expect(msg, isNot(contains('alice')));
+      expect(msg, isNot(contains('secret')));
+      expect(msg, contains('password=REDACTED'));
     });
 
     test('subclasses are distinguishable', () {

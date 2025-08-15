@@ -73,8 +73,8 @@ void main() {
   );
 
   test('getShortEpg decodes base64 title/description', () async {
-    final c = makeClient();
-    final epg = await c.getShortEpg(epgChannelId: 'ch.a', limit: 1);
+    final client = makeClient();
+    final epg = await client.getShortEpg(epgChannelId: 'ch.a', limit: 1);
     expect(epg.length, 1);
     expect(epg.first.title, 'News');
     expect(epg.first.description, 'daily news');

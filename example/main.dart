@@ -48,12 +48,12 @@ void main(List<String> args) async {
       ..writeln('expires: ${info.user.expiresAt}')
       ..writeln('max connections: ${info.user.maxConnections}')
       ..writeln('Server: ${info.server.baseUrl} (https: ${info.server.https})');
-  } on XtAuthError catch (e) {
-    stderr.writeln('Auth error: $e');
+  } on XtAuthError catch (err) {
+    stderr.writeln('Auth error: $err');
     await mock?.close(force: true);
     exit(1);
-  } on XtError catch (e) {
-    stderr.writeln('Error: $e');
+  } on XtError catch (err) {
+    stderr.writeln('Error: $err');
     await mock?.close(force: true);
     exit(2);
   }
@@ -64,27 +64,30 @@ void main(List<String> args) async {
 
     final liveCats = await client.getLiveCategories();
     stdout.writeln('Live categories: ${liveCats.length}');
-    for (final c in liveCats.take(3)) {
-      stdout.writeln('  - \'${c.name}\' (id=${c.id})');
+    for (final category in liveCats.take(3)) {
+      stdout.writeln('  - \'${category.name}\' (id=${category.id})');
     }
     if (liveCats.isNotEmpty) {
       final category = liveCats[1];
       final streams = await client.getLiveStreams(categoryId: category.id);
       if (streams.isNotEmpty) {
-        final s = streams.first;
+        final stream = streams.first;
         stdout.writeln(
-          'First live in ${category.name}: \'${s.name}\' (id=${s.streamId})',
+          'First live in ${category.name}: \'${stream.name}\' (id=${stream.streamId})',
         );
         // Most portals work with streamId for short EPG. If a channel
         // returns empty, it may require epg_channel_id; our client will
         // retry internally when both are provided.
-        final epg = await client.getShortEpg(streamId: s.streamId, limit: 2);
+        final epg = await client.getShortEpg(
+          streamId: stream.streamId,
+          limit: 2,
+        );
         if (epg.isEmpty) {
           stdout.writeln('  No EPG data available');
         } else {
-          for (final e in epg) {
+          for (final epgEntry in epg) {
             stdout.writeln(
-              '  EPG: ${e.startUtc.toIso8601String()} - ${e.endUtc.toIso8601String()} \'${e.title}\'',
+              '  EPG: ${epgEntry.startUtc.toIso8601String()} - ${epgEntry.endUtc.toIso8601String()} \'${epgEntry.title}\'',
             );
           }
         }
@@ -93,17 +96,17 @@ void main(List<String> args) async {
 
     final vodCats = await client.getVodCategories();
     stdout.writeln('VOD categories: ${vodCats.length}');
-    for (final c in vodCats.take(3)) {
-      stdout.writeln('  - \'${c.name}\' (id=${c.id})');
+    for (final category in vodCats.take(3)) {
+      stdout.writeln('  - \'${category.name}\' (id=${category.id})');
     }
     if (vodCats.isNotEmpty) {
       final vod = await client.getVodStreams(categoryId: vodCats.first.id);
       if (vod.isNotEmpty) {
-        final v = vod.first;
+        final vodItem = vod.first;
         stdout.writeln(
-          'First VOD in ${vodCats.first.name}: \'${v.name}\' (id=${v.streamId})',
+          'First VOD in ${vodCats.first.name}: \'${vodItem.name}\' (id=${vodItem.streamId})',
         );
-        final vd = await client.getVodInfo(v.streamId);
+        final vd = await client.getVodInfo(vodItem.streamId);
         stdout.writeln(
           '  VOD details: duration=${vd.duration}, rating=${vd.rating}',
         );
@@ -112,17 +115,17 @@ void main(List<String> args) async {
 
     final seriesCats = await client.getSeriesCategories();
     stdout.writeln('Series categories: ${seriesCats.length}');
-    for (final c in seriesCats.take(3)) {
-      stdout.writeln('  - \'${c.name}\' (id=${c.id})');
+    for (final category in seriesCats.take(3)) {
+      stdout.writeln('  - \'${category.name}\' (id=${category.id})');
     }
     if (seriesCats.isNotEmpty) {
       final ser = await client.getSeries(categoryId: seriesCats.first.id);
       if (ser.isNotEmpty) {
-        final s = ser.first;
+        final seriesItem = ser.first;
         stdout.writeln(
-          'First series in ${seriesCats.first.name}: \'${s.name}\' (id=${s.seriesId})',
+          'First series in ${seriesCats.first.name}: \'${seriesItem.name}\' (id=${seriesItem.seriesId})',
         );
-        final sd = await client.getSeriesInfo(s.seriesId);
+        final sd = await client.getSeriesInfo(seriesItem.seriesId);
         final season1 = sd.seasons.keys.isNotEmpty
             ? sd.seasons.keys.first
             : null;
@@ -134,8 +137,8 @@ void main(List<String> args) async {
         }
       }
     }
-  } on XtError catch (e) {
-    stderr.writeln('Catalog error: $e');
+  } on XtError catch (err) {
+    stderr.writeln('Catalog error: $err');
   }
 
   // Diagnostics: ping and capabilities
@@ -148,8 +151,8 @@ void main(List<String> args) async {
     stdout.writeln(
       'Capabilities: shortEPG=${caps.supportsShortEpg}, extEPG=${caps.supportsExtendedEpg}, m3u=${caps.supportsM3u}, xmltv=${caps.supportsXmltv}',
     );
-  } on XtError catch (e) {
-    stderr.writeln('Diag error: $e');
+  } on XtError catch (err) {
+    stderr.writeln('Diag error: $err');
   }
 
   // Show URL builder examples
@@ -388,35 +391,35 @@ class _CliOptions {
       user: env['XT_USER'],
       pass: env['XT_PASS'],
     );
-    for (var i = 0; i < args.length; i++) {
-      final a = args[i];
-      switch (a) {
+    for (var index = 0; index < args.length; index++) {
+      final arg = args[index];
+      switch (arg) {
         case '--portal':
-          if (i + 1 >= args.length) return null;
-          opts = opts.copyWith(portal: args[++i]);
+          if (index + 1 >= args.length) return null;
+          opts = opts.copyWith(portal: args[++index]);
           break;
         case '--user':
-          if (i + 1 >= args.length) return null;
-          opts = opts.copyWith(user: args[++i]);
+          if (index + 1 >= args.length) return null;
+          opts = opts.copyWith(user: args[++index]);
           break;
         case '--pass':
-          if (i + 1 >= args.length) return null;
-          opts = opts.copyWith(pass: args[++i]);
+          if (index + 1 >= args.length) return null;
+          opts = opts.copyWith(pass: args[++index]);
           break;
         case '--self-signed':
           opts = opts.copyWith(selfSigned: true);
           break;
         case '--probe':
-          if (i + 1 >= args.length) return null;
-          opts = opts.copyWith(probeUrl: args[++i]);
+          if (index + 1 >= args.length) return null;
+          opts = opts.copyWith(probeUrl: args[++index]);
           break;
         case '--mock':
           opts = opts.copyWith(mock: true);
           break;
         case '--stream-id':
-          if (i + 1 >= args.length) return null;
-          final v = int.tryParse(args[++i]) ?? 1;
-          opts = opts.copyWith(streamId: v);
+          if (index + 1 >= args.length) return null;
+          final parsedStreamId = int.tryParse(args[++index]) ?? 1;
+          opts = opts.copyWith(streamId: parsedStreamId);
           break;
         default:
           return null;

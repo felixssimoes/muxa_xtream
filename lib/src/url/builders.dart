@@ -50,7 +50,7 @@ Uri seriesUrl(
 
 Uri _buildPath(Uri base, List<String> add) {
   final segs = <String>[
-    ...base.pathSegments.where((s) => s.isNotEmpty),
+    ...base.pathSegments.where((segment) => segment.isNotEmpty),
     ...add,
   ];
   return base.replace(path: segs.join('/'));

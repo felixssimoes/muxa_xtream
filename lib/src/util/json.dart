@@ -1,36 +1,36 @@
 // Lightweight JSON helpers to tolerate variant types from Xtream-style portals.
 import 'dart:convert';
 
-int? asInt(dynamic v) {
-  if (v == null) return null;
-  if (v is int) return v;
-  if (v is double) return v.toInt();
-  if (v is String) {
-    final s = v.trim();
-    if (s.isEmpty) return null;
-    return int.tryParse(s);
+int? asInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) {
+    final str = value.trim();
+    if (str.isEmpty) return null;
+    return int.tryParse(str);
   }
   return null;
 }
 
-double? asDouble(dynamic v) {
-  if (v == null) return null;
-  if (v is double) return v;
-  if (v is int) return v.toDouble();
-  if (v is String) {
-    final s = v.trim();
-    if (s.isEmpty) return null;
-    return double.tryParse(s);
+double? asDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) {
+    final str = value.trim();
+    if (str.isEmpty) return null;
+    return double.tryParse(str);
   }
   return null;
 }
 
-bool? asBool(dynamic v) {
-  if (v == null) return null;
-  if (v is bool) return v;
-  if (v is num) return v != 0;
-  if (v is String) {
-    switch (v.trim().toLowerCase()) {
+bool? asBool(dynamic value) {
+  if (value == null) return null;
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    switch (value.trim().toLowerCase()) {
       case '1':
       case 'true':
       case 'yes':
@@ -48,31 +48,31 @@ bool? asBool(dynamic v) {
   return null;
 }
 
-String? asString(dynamic v) {
-  if (v == null) return null;
-  return v.toString();
+String? asString(dynamic value) {
+  if (value == null) return null;
+  return value.toString();
 }
 
 /// Heuristically decode Base64-encoded UTF-8 strings.
 /// Returns the original string if decoding fails or looks non-textual.
-String maybeDecodeBase64Utf8(String s) {
-  final trimmed = s.trim();
-  if (trimmed.isEmpty) return s;
+String maybeDecodeBase64Utf8(String text) {
+  final trimmed = text.trim();
+  if (trimmed.isEmpty) return text;
   // Quick filter: base64 alphabet and length multiple of 4
   final base64Re = RegExp(r'^[A-Za-z0-9+/]+={0,2}$');
   if (!base64Re.hasMatch(trimmed) || (trimmed.length % 4) != 0) {
-    return s;
+    return text;
   }
   try {
     final decodedBytes = base64Decode(trimmed);
-    final text = utf8.decode(decodedBytes, allowMalformed: true);
-    if (text.isNotEmpty && _isMostlyTextual(text)) {
-      return text;
+    final decodedText = utf8.decode(decodedBytes, allowMalformed: true);
+    if (decodedText.isNotEmpty && _isMostlyTextual(decodedText)) {
+      return decodedText;
     }
   } catch (_) {
     // fall through
   }
-  return s;
+  return text;
 }
 
 bool _isMostlyTextual(String text) {
@@ -91,18 +91,18 @@ bool _isMostlyTextual(String text) {
   return printable / total >= 0.9;
 }
 
-DateTime? parseDateUtc(dynamic v) {
-  if (v == null) return null;
+DateTime? parseDateUtc(dynamic value) {
+  if (value == null) return null;
   // Support epoch seconds/milliseconds or ISO strings.
-  if (v is int) {
-    return _fromEpoch(v);
+  if (value is int) {
+    return _fromEpoch(value);
   }
-  if (v is String) {
-    final s = v.trim();
-    if (s.isEmpty) return null;
-    final n = int.tryParse(s);
-    if (n != null) return _fromEpoch(n);
-    final dt = DateTime.tryParse(s);
+  if (value is String) {
+    final str = value.trim();
+    if (str.isEmpty) return null;
+    final numValue = int.tryParse(str);
+    if (numValue != null) return _fromEpoch(numValue);
+    final dt = DateTime.tryParse(str);
     return dt?.toUtc();
   }
   return null;
@@ -116,8 +116,8 @@ DateTime _fromEpoch(int value) {
 }
 
 T? pick<T>(Map map, List<String> keys) {
-  for (final k in keys) {
-    if (map.containsKey(k)) return map[k] as T?;
+  for (final key in keys) {
+    if (map.containsKey(key)) return map[key] as T?;
   }
   return null;
 }

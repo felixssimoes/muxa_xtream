@@ -39,7 +39,7 @@ Future<String> suggestStreamExtension(
 String? _inferFromHeaders(Map<String, String> headers, Uri url) {
   String? ct = headers.entries
       .firstWhere(
-        (e) => e.key.toLowerCase() == 'content-type',
+        (entry) => entry.key.toLowerCase() == 'content-type',
         orElse: () => const MapEntry('', ''),
       )
       .value;

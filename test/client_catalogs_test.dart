@@ -102,29 +102,29 @@ void main() {
   );
 
   test('fetches live/vod/series categories', () async {
-    final c = makeClient();
-    final live = await c.getLiveCategories();
+    final client = makeClient();
+    final live = await client.getLiveCategories();
     expect(live, isNotEmpty);
     expect(live.first.kind, 'live');
 
-    final vod = await c.getVodCategories();
+    final vod = await client.getVodCategories();
     expect(vod.single.name, 'Movies');
 
-    final series = await c.getSeriesCategories();
+    final series = await client.getSeriesCategories();
     expect(series.single.id, '20');
   });
 
   test('fetches live/vod/series lists', () async {
-    final c = makeClient();
-    final live = await c.getLiveStreams(categoryId: '1');
+    final client = makeClient();
+    final live = await client.getLiveStreams(categoryId: '1');
     expect(live.single.streamId, 12);
     expect(live.single.categoryId, '1');
 
-    final vod = await c.getVodStreams();
+    final vod = await client.getVodStreams();
     expect(vod.single.streamId, 77);
 
-    final ser = await c.getSeries();
-    expect(ser.single.seriesId, 5);
+    final series = await client.getSeries();
+    expect(series.single.seriesId, 5);
   });
 
   test('returns XtAuthError on bad creds', () async {

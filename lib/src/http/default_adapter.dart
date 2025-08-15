@@ -94,15 +94,15 @@ class XtDefaultHttpAdapter implements XtHttpAdapter {
 
       // Merge headers: defaults first, then request overrides.
       final headers = {...options.defaultHeaders, ...request.headers};
-      headers.forEach((k, v) => req.headers.set(k, v));
+      headers.forEach((key, value) => req.headers.set(key, value));
 
       final resp = await req.close().timeout(timeout);
       final bytes = await resp.fold<BytesBuilder>(BytesBuilder(copy: false), (
-        b,
+        builder,
         data,
       ) {
-        b.add(data);
-        return b;
+        builder.add(data);
+        return builder;
       });
       final body = bytes.takeBytes();
       final hdrs = <String, String>{};
@@ -115,22 +115,22 @@ class XtDefaultHttpAdapter implements XtHttpAdapter {
         bodyBytes: body,
         url: resp.redirects.isNotEmpty ? resp.redirects.last.location : url,
       );
-    } on TimeoutException catch (e, st) {
+    } on TimeoutException catch (err, st) {
       throw XtNetworkError(
         'Timeout contacting ${Redactor.redactUrl(url.toString())}',
-        cause: e,
+        cause: err,
         stackTrace: st,
       );
-    } on IOException catch (e, st) {
+    } on IOException catch (err, st) {
       throw XtNetworkError(
         'Network error for ${Redactor.redactUrl(url.toString())}',
-        cause: e,
+        cause: err,
         stackTrace: st,
       );
-    } catch (e, st) {
+    } catch (err, st) {
       throw XtNetworkError(
         'Unexpected network error for ${Redactor.redactUrl(url.toString())}',
-        cause: e,
+        cause: err,
         stackTrace: st,
       );
     }

@@ -92,18 +92,18 @@ void main() {
   );
 
   test('getVodInfo returns details', () async {
-    final c = makeClient();
-    final d = await c.getVodInfo(77);
-    expect(d.streamId, 77);
-    expect(d.name, 'Movie77');
-    expect(d.duration, const Duration(seconds: 3600));
+    final client = makeClient();
+    final details = await client.getVodInfo(77);
+    expect(details.streamId, 77);
+    expect(details.name, 'Movie77');
+    expect(details.duration, const Duration(seconds: 3600));
   });
 
   test('getSeriesInfo returns details with episodes', () async {
-    final c = makeClient();
-    final s = await c.getSeriesInfo(5);
-    expect(s.seriesId, 5);
-    expect(s.seasons[1]!.single.title, 'Ep1');
+    final client = makeClient();
+    final series = await client.getSeriesInfo(5);
+    expect(series.seriesId, 5);
+    expect(series.seasons[1]!.single.title, 'Ep1');
   });
 
   test('auth errors throw XtAuthError', () async {
