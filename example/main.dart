@@ -91,6 +91,10 @@ void main(List<String> args) async {
         stdout.writeln(
           'First VOD in ${vodCats.first.name}: \'${v.name}\' (id=${v.streamId})',
         );
+        final vd = await client.getVodInfo(v.streamId);
+        stdout.writeln(
+          '  VOD details: duration=${vd.duration}, rating=${vd.rating}',
+        );
       }
     }
 
@@ -106,6 +110,16 @@ void main(List<String> args) async {
         stdout.writeln(
           'First series in ${seriesCats.first.name}: \'${s.name}\' (id=${s.seriesId})',
         );
+        final sd = await client.getSeriesInfo(s.seriesId);
+        final season1 = sd.seasons.keys.isNotEmpty
+            ? sd.seasons.keys.first
+            : null;
+        if (season1 != null && sd.seasons[season1]!.isNotEmpty) {
+          final ep = sd.seasons[season1]!.first;
+          stdout.writeln(
+            '  Series details: S${ep.season}E${ep.episode} \'${ep.title}\'',
+          );
+        }
       }
     }
   } on XtError catch (e) {
@@ -206,6 +220,38 @@ Future<HttpServer> _startMockServer() async {
                 bodyObj = [
                   {'series_id': '5', 'name': 'Show', 'category_id': cat},
                 ];
+                break;
+              case 'get_vod_info':
+                final id = int.tryParse(qp['vod_id'] ?? '') ?? 0;
+                bodyObj = {
+                  'stream_id': id,
+                  'title': 'Movie$id',
+                  'plot': 'lorem',
+                  'rating': '8.0',
+                  'year': '2001',
+                  'duration': '3600',
+                  'poster': 'http://img',
+                };
+                break;
+              case 'get_series_info':
+                final id = int.tryParse(qp['series_id'] ?? '') ?? 0;
+                bodyObj = {
+                  'series_id': '$id',
+                  'name': 'Show$id',
+                  'plot': 'ipsum',
+                  'poster': 'http://img2',
+                  'episodes': {
+                    '1': [
+                      {
+                        'id': 100,
+                        'title': 'Ep1',
+                        'season': 1,
+                        'episode': 1,
+                        'duration': '1800',
+                      },
+                    ],
+                  },
+                };
                 break;
               default:
                 req.response.statusCode = 400;

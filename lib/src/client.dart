@@ -164,6 +164,27 @@ class XtreamClient {
     throw const XtParseError('Expected list for series');
   }
 
+  /// VOD details by stream id.
+  Future<XtVodDetails> getVodInfo(int vodId) async {
+    final data = await _getAction('get_vod_info', extra: {'vod_id': '$vodId'});
+    if (data is Map<String, dynamic>) {
+      return XtVodDetails.fromJson(data);
+    }
+    throw const XtParseError('Expected object for VOD details');
+  }
+
+  /// Series details by series id.
+  Future<XtSeriesDetails> getSeriesInfo(int seriesId) async {
+    final data = await _getAction(
+      'get_series_info',
+      extra: {'series_id': '$seriesId'},
+    );
+    if (data is Map<String, dynamic>) {
+      return XtSeriesDetails.fromJson(data);
+    }
+    throw const XtParseError('Expected object for series details');
+  }
+
   Future<dynamic> _getAction(
     String action, {
     Map<String, String>? extra,
