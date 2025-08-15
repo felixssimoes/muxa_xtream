@@ -1,6 +1,6 @@
 name: muxa_xtream
 description: "Xtream API client for Dart (no UI)."
-version: 0.0.1
+version: 0.1.0
 
 environment:
   sdk: ^3.8.1

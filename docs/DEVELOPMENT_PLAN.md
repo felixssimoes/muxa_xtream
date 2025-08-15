@@ -62,7 +62,7 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Finalize `tool/verify.sh` and ensure local parity
 - [x] Add CI workflow (format, analyze, test, coverage)
 
-## Phase 11 — Versioning & Release — Status: `todo`
-- [ ] Update `CHANGELOG.md`; bump version to `0.1.0`
+## Phase 11 — Versioning & Release — Status: `in progress`
+- [x] Update `CHANGELOG.md`; bump version to `0.1.0`
 - [ ] Run `flutter pub publish --dry-run` and address findings
 - [ ] Tag release notes

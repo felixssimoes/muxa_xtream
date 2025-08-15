@@ -32,4 +32,4 @@ export 'models/xmltv.dart';
 export 'xmltv/parser.dart';
 
 /// Package version string.
-const String muxaXtreamVersion = '0.0.1-dev';
+const String muxaXtreamVersion = '0.1.0';
