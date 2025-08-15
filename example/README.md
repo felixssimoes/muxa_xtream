@@ -23,6 +23,7 @@ Notes
   - Catalogs: `getLiveCategories`, `getVodCategories`, `getSeriesCategories`, and fetching lists
   - Details: `getVodInfo`, `getSeriesInfo`
   - EPG: `getShortEpg(streamId, limit)`
+  - Diagnostics: `ping()` and `capabilities()`
   - URL builders: `liveUrl`, `vodUrl`, `seriesUrl`
   - Probe helper: `suggestStreamExtension`
 - In `--mock` mode, a local HTTP server emulates key Xtream endpoints including player_api.php actions used for catalogs.

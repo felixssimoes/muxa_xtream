@@ -12,6 +12,8 @@ import 'models/live.dart';
 import 'models/vod.dart';
 import 'models/series.dart';
 import 'models/epg.dart';
+import 'models/capabilities.dart';
+import 'models/health.dart';
 import 'models/server.dart';
 import 'models/user.dart';
 
@@ -250,6 +252,59 @@ class XtreamClient {
         stackTrace: st,
       );
     }
+  }
+
+  /// Ping the portal by calling player_api.php (auth check) and measuring latency.
+  Future<XtHealth> ping() async {
+    final started = DateTime.now();
+    final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
+      queryParameters: {'username': creds.username, 'password': creds.password},
+    );
+    logger?.info('PING ${Redactor.redactUrl(url.toString())}');
+    final res = await http.get(
+      XtRequest(
+        url: url,
+        headers: {
+          if (options.userAgent != null) 'User-Agent': options.userAgent!,
+          ...options.defaultHeaders,
+          'Accept': 'application/json',
+        },
+        timeout: options.receiveTimeout,
+      ),
+    );
+    final latency = DateTime.now().difference(started);
+    final ok = res.ok;
+    if (!ok) {
+      final code = res.statusCode;
+      final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
+      if (code == 401 || code == 403) throw XtAuthError(msg);
+      if (code == 451) throw XtPortalBlockedError(msg);
+      throw XtNetworkError(msg);
+    }
+    return XtHealth(ok: ok, statusCode: res.statusCode, latency: latency);
+  }
+
+  /// Fetch server capabilities if available (tolerates missing endpoint with sane defaults).
+  Future<XtCapabilities> capabilities() async {
+    try {
+      final data = await _getAction('get_server_capabilities');
+      if (data is Map<String, dynamic>) {
+        return XtCapabilities.fromJson(data);
+      }
+      // Some servers might nest under a key
+      if (data is List &&
+          data.isNotEmpty &&
+          data.first is Map<String, dynamic>) {
+        return XtCapabilities.fromJson(data.first as Map<String, dynamic>);
+      }
+    } on XtNetworkError {
+      rethrow;
+    } on XtAuthError {
+      rethrow;
+    } catch (_) {
+      // Fall through to defaults below
+    }
+    return const XtCapabilities();
   }
 }
 

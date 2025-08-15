@@ -34,7 +34,7 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Implement catalogs: live/vod/series categories and lists
 - [x] Implement details: `getVodInfo`, `getSeriesInfo`
 - [x] Implement short EPG: `getShortEpg(streamId, limit)`
-- [ ] Implement `ping()` and `capabilities()`
+- [x] Implement `ping()` and `capabilities()`
 - [ ] Add unit/contract tests (success/failure: 401/403/blocked/network/HTML error; large lists)
 
 ## Phase 6 — Optional M3U — Status: `todo`

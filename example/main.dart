@@ -132,6 +132,20 @@ void main(List<String> args) async {
     stderr.writeln('Catalog error: $e');
   }
 
+  // Diagnostics: ping and capabilities
+  try {
+    final health = await client.ping();
+    stdout.writeln(
+      'Ping: ok=${health.ok} status=${health.statusCode} latency=${health.latency.inMilliseconds}ms',
+    );
+    final caps = await client.capabilities();
+    stdout.writeln(
+      'Capabilities: shortEPG=${caps.supportsShortEpg}, extEPG=${caps.supportsExtendedEpg}, m3u=${caps.supportsM3u}, xmltv=${caps.supportsXmltv}',
+    );
+  } on XtError catch (e) {
+    stderr.writeln('Diag error: $e');
+  }
+
   // Show URL builder examples
   final live = liveUrl(portal, creds, opts.streamId);
   final vod = vodUrl(portal, creds, opts.streamId);
