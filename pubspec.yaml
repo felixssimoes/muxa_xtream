@@ -5,6 +5,8 @@ version: 0.1.0
 environment:
   sdk: ^3.8.1
 
+repository: https://github.com/felixssimoes/muxa_xtream
+
 dependencies:
   # No Flutter dependency; pure Dart package
 
