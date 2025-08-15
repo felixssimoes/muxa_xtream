@@ -29,13 +29,13 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Optional: probe helper (HEAD/Range) for extension inference
 - [x] Add unit tests for URL shapes and defaults
 
-## Phase 5 — Client Core — Status: `in progress`
+## Phase 5 — Client Core — Status: `done`
 - [x] Implement account info: `getUserAndServerInfo`
 - [x] Implement catalogs: live/vod/series categories and lists
 - [x] Implement details: `getVodInfo`, `getSeriesInfo`
 - [x] Implement short EPG: `getShortEpg(streamId, limit)`
 - [x] Implement `ping()` and `capabilities()`
-- [ ] Add unit/contract tests (success/failure: 401/403/blocked/network/HTML error; large lists)
+- [x] Add unit/contract tests (success/failure: 401/403/blocked/network/HTML error; large lists)
 
 ## Phase 6 — Optional M3U — Status: `todo`
 - [ ] Implement `get.php` fetch and streaming parser
