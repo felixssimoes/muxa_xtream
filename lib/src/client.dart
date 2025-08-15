@@ -7,6 +7,10 @@ import 'core/redaction.dart';
 import 'http/adapter.dart';
 import 'http/adapter_factory.dart';
 import 'models/account.dart';
+import 'models/category.dart';
+import 'models/live.dart';
+import 'models/vod.dart';
+import 'models/series.dart';
 import 'models/server.dart';
 import 'models/user.dart';
 
@@ -70,6 +74,129 @@ class XtreamClient {
       return XtUserAndServerInfo(user: user, server: server);
     } on XtError {
       rethrow;
+    } catch (e, st) {
+      throw XtParseError(
+        'Invalid JSON from ${Redactor.redactUrl(url.toString())}',
+        cause: e,
+        stackTrace: st,
+      );
+    }
+  }
+
+  /// Live categories.
+  Future<List<XtCategory>> getLiveCategories() async {
+    final data = await _getAction('get_live_categories');
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map((e) => XtCategory.fromJson(e, kind: 'live'))
+          .toList(growable: false);
+    }
+    throw const XtParseError('Expected list for live categories');
+  }
+
+  /// VOD categories.
+  Future<List<XtCategory>> getVodCategories() async {
+    final data = await _getAction('get_vod_categories');
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map((e) => XtCategory.fromJson(e, kind: 'vod'))
+          .toList(growable: false);
+    }
+    throw const XtParseError('Expected list for VOD categories');
+  }
+
+  /// Series categories.
+  Future<List<XtCategory>> getSeriesCategories() async {
+    final data = await _getAction('get_series_categories');
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map((e) => XtCategory.fromJson(e, kind: 'series'))
+          .toList(growable: false);
+    }
+    throw const XtParseError('Expected list for series categories');
+  }
+
+  /// Live streams (optionally filtered by category id).
+  Future<List<XtLiveChannel>> getLiveStreams({String? categoryId}) async {
+    final data = await _getAction(
+      'get_live_streams',
+      extra: {if (categoryId != null) 'category_id': categoryId},
+    );
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(XtLiveChannel.fromJson)
+          .toList(growable: false);
+    }
+    throw const XtParseError('Expected list for live streams');
+  }
+
+  /// VOD streams (optionally filtered by category id).
+  Future<List<XtVodItem>> getVodStreams({String? categoryId}) async {
+    final data = await _getAction(
+      'get_vod_streams',
+      extra: {if (categoryId != null) 'category_id': categoryId},
+    );
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(XtVodItem.fromJson)
+          .toList(growable: false);
+    }
+    throw const XtParseError('Expected list for VOD streams');
+  }
+
+  /// Series list (optionally filtered by category id).
+  Future<List<XtSeriesItem>> getSeries({String? categoryId}) async {
+    final data = await _getAction(
+      'get_series',
+      extra: {if (categoryId != null) 'category_id': categoryId},
+    );
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(XtSeriesItem.fromJson)
+          .toList(growable: false);
+    }
+    throw const XtParseError('Expected list for series');
+  }
+
+  Future<dynamic> _getAction(
+    String action, {
+    Map<String, String>? extra,
+  }) async {
+    final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
+      queryParameters: {
+        'username': creds.username,
+        'password': creds.password,
+        'action': action,
+        ...?extra,
+      },
+    );
+    logger?.info('GET ${Redactor.redactUrl(url.toString())}');
+    final res = await http.get(
+      XtRequest(
+        url: url,
+        headers: {
+          if (options.userAgent != null) 'User-Agent': options.userAgent!,
+          ...options.defaultHeaders,
+          'Accept': 'application/json',
+        },
+        timeout: options.receiveTimeout,
+      ),
+    );
+    if (!res.ok) {
+      final code = res.statusCode;
+      final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
+      if (code == 401 || code == 403) throw XtAuthError(msg);
+      if (code == 451) throw XtPortalBlockedError(msg);
+      throw XtNetworkError(msg);
+    }
+    try {
+      return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e, st) {
       throw XtParseError(
         'Invalid JSON from ${Redactor.redactUrl(url.toString())}',

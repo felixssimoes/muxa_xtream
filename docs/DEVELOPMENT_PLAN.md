@@ -31,7 +31,7 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 
 ## Phase 5 — Client Core — Status: `in progress`
 - [x] Implement account info: `getUserAndServerInfo`
-- [ ] Implement catalogs: live/vod/series categories and lists
+- [x] Implement catalogs: live/vod/series categories and lists
 - [ ] Implement details: `getVodInfo`, `getSeriesInfo`
 - [ ] Implement short EPG: `getShortEpg(streamId, limit)`
 - [ ] Implement `ping()` and `capabilities()`
