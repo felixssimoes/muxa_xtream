@@ -7,6 +7,7 @@
 - Root files: `pubspec.yaml` (deps, SDK), `analysis_options.yaml` (lints), `README.md`, `CHANGELOG.md`.
 
 ## Build, Test, and Development Commands
+- Note: A pre-commit hook runs the full verification pipeline automatically on every commit. Running the verify script manually is optional and useful mainly when iterating on failures.
 - Install deps: `dart pub get` — resolves package dependencies.
 - Run tests: `dart test` — executes test suites.
 - Coverage: `dart test --coverage=coverage` — writes VM coverage data.
@@ -26,7 +27,7 @@
 - Framework: `flutter_test` with `test(...)` and `group(...)`.
 - Location: place tests in `test/`; name files `*_test.dart`.
 - Aim for fast, deterministic unit tests. Prefer pure Dart tests for logic.
-- Run locally: `flutter test && flutter analyze && dart format --output=none --set-exit-if-changed .` before PRs.
+- You can still run tests and analysis locally while iterating, but the pre-commit hook will enforce verification automatically on commit.
 
 ## Commit & Pull Request Guidelines
 - Commits: use Conventional Commits with structured, multi-line messages.
@@ -51,7 +52,7 @@
       - Implement parsing with null-tolerant converters.
       - Add unit tests for required/optional fields.
 - PRs: include a clear description, linked issues, and test coverage where applicable. Screenshot logs only when relevant.
-- Checks: run `bash tool/verify.sh` locally; ensure format, analyze, and tests pass. Update `CHANGELOG.md` and bump `version` in `pubspec.yaml` for releases.
+- Checks: a pre-commit hook runs `tool/verify.sh` (format, analyze, tests) on every commit and blocks on failure. Running it manually is optional when debugging. Update `CHANGELOG.md` and bump `version` in `pubspec.yaml` for releases.
 
 ## Plan Updates (DEVELOPMENT_PLAN.md)
 - Status rules:

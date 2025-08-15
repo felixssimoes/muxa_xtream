@@ -66,3 +66,49 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Update `CHANGELOG.md`; bump version to `0.1.0`
 - [x] Run `flutter pub publish --dry-run` and address findings
 - [x] Tag release notes
+
+
+## Phase 12 — Release & Publish — Status: `todo`
+- [ ] Push `main` and tag `v0.1.0` to origin
+- [ ] Publish to pub.dev (manual confirmation; 2FA as required)
+- [ ] Create GitHub Release with highlights and links to README
+- [ ] Add shields/badges (pub version, likes, CI) to README
+
+## Phase 13 — Examples & Guides — Status: `todo`
+- [ ] Expand `example/` to cover live, VOD, and series end-to-end flows
+- [ ] Add a "Cookbook" section in README (URL builders, retries, redaction)
+- [ ] Document common portal quirks and troubleshooting playbook
+
+## Phase 14 — Adapters & Integrations — Status: `todo`
+- [ ] Provide `package:http` adapter implementation
+- [ ] Provide `dio` adapter implementation
+- [ ] Add a lightweight mock adapter utilities module for tests
+
+## Phase 15 — Catch‑up/Timeshift (Exploratory) — Status: `todo`
+- [ ] Research portal support variations and required params
+- [ ] Extend URL builders for timeshift paths
+- [ ] Minimal contract tests where feasible
+
+## Phase 16 — Per‑request Overrides — Status: `todo`
+- [ ] API for per‑request headers and User‑Agent overrides
+- [ ] Wire overrides through builders/adapters safely
+- [ ] Docs and examples for providers that require custom headers
+
+## Phase 17 — Caching & Rate Limiting — Status: `todo`
+- [ ] Define a lightweight cache interface (user‑supplied storage)
+- [ ] Detect `429`/throttling and add adaptive backoff
+- [ ] Tests for backoff policy and cache plumbing
+
+## Phase 18 — Performance & Benchmarks — Status: `todo`
+- [ ] Micro‑benchmarks for parsing and builders
+- [ ] Large catalog memory/latency profiling
+- [ ] XMLTV throughput and backpressure tuning
+
+## Phase 19 — Discovery & Extras (Optional module) — Status: `todo`
+- [ ] Prototype MAC/Stalker discovery as a separate package
+- [ ] Assess feasibility and compliance considerations
+
+## Phase 20 — v1.0.0 Hardening — Status: `todo`
+- [ ] Issue triage and stability fixes from early adopters
+- [ ] Public API audit; any breaking changes queued for 1.0
+- [ ] Final docs pass (README, dartdoc); publish `1.0.0`
