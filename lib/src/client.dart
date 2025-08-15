@@ -39,6 +39,17 @@ class XtreamClient {
   }) : options = options ?? const XtreamClientOptions(),
        http = http ?? createDefaultHttpAdapter();
 
+  void _log(String prefix, Uri url) {
+    logger?.info('$prefix ${Redactor.redactUrl(url.toString())}');
+  }
+
+  Never _raiseHttp(Uri url, int code) {
+    final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
+    if (code == 401 || code == 403) throw XtAuthError(msg);
+    if (code == 451) throw XtPortalBlockedError(msg);
+    throw XtNetworkError(msg);
+  }
+
   /// Fetches account and server info from `player_api.php`.
   Future<XtUserAndServerInfo> getUserAndServerInfo({
     XtCancellationToken? cancel,
@@ -46,7 +57,7 @@ class XtreamClient {
     final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
       queryParameters: {'username': creds.username, 'password': creds.password},
     );
-    logger?.info('GET ${Redactor.redactUrl(url.toString())}');
+    _log('GET', url);
 
     final res = await http.get(
       XtRequest(
@@ -60,17 +71,7 @@ class XtreamClient {
       ),
     );
 
-    if (!res.ok) {
-      final code = res.statusCode;
-      final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
-      if (code == 401 || code == 403) {
-        throw XtAuthError(msg);
-      }
-      if (code == 451) {
-        throw XtPortalBlockedError(msg);
-      }
-      throw XtNetworkError(msg);
-    }
+    if (!res.ok) _raiseHttp(url, res.statusCode);
 
     try {
       final map =
@@ -290,7 +291,7 @@ class XtreamClient {
         ...?extra,
       },
     );
-    logger?.info('GET ${Redactor.redactUrl(url.toString())}');
+    _log('GET', url);
     final res = await http.get(
       XtRequest(
         url: url,
@@ -303,13 +304,7 @@ class XtreamClient {
         cancel: cancel,
       ),
     );
-    if (!res.ok) {
-      final code = res.statusCode;
-      final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
-      if (code == 401 || code == 403) throw XtAuthError(msg);
-      if (code == 451) throw XtPortalBlockedError(msg);
-      throw XtNetworkError(msg);
-    }
+    if (!res.ok) _raiseHttp(url, res.statusCode);
     try {
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (err, st) {
@@ -327,7 +322,7 @@ class XtreamClient {
     final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
       queryParameters: {'username': creds.username, 'password': creds.password},
     );
-    logger?.info('PING ${Redactor.redactUrl(url.toString())}');
+    _log('PING', url);
     final res = await http.get(
       XtRequest(
         url: url,
@@ -342,13 +337,7 @@ class XtreamClient {
     );
     final latency = DateTime.now().difference(started);
     final ok = res.ok;
-    if (!ok) {
-      final code = res.statusCode;
-      final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
-      if (code == 401 || code == 403) throw XtAuthError(msg);
-      if (code == 451) throw XtPortalBlockedError(msg);
-      throw XtNetworkError(msg);
-    }
+    if (!ok) _raiseHttp(url, res.statusCode);
     return XtHealth(ok: ok, statusCode: res.statusCode, latency: latency);
   }
 
@@ -390,7 +379,7 @@ class XtreamClient {
         'output': output,
       },
     );
-    logger?.info('GET ${Redactor.redactUrl(url.toString())}');
+    _log('GET', url);
     final res = await http.get(
       XtRequest(
         url: url,
@@ -404,13 +393,7 @@ class XtreamClient {
         cancel: cancel,
       ),
     );
-    if (!res.ok) {
-      final code = res.statusCode;
-      final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
-      if (code == 401 || code == 403) throw XtAuthError(msg);
-      if (code == 451) throw XtPortalBlockedError(msg);
-      throw XtNetworkError(msg);
-    }
+    if (!res.ok) _raiseHttp(url, res.statusCode);
     // Stream-parse the playlist
     yield* parseM3u(Stream<List<int>>.value(res.bodyBytes));
   }
@@ -422,7 +405,7 @@ class XtreamClient {
     final url = _buildPath(portal.baseUri, ['xmltv.php']).replace(
       queryParameters: {'username': creds.username, 'password': creds.password},
     );
-    logger?.info('GET ${Redactor.redactUrl(url.toString())}');
+    _log('GET', url);
     final res = await http.get(
       XtRequest(
         url: url,
@@ -435,13 +418,7 @@ class XtreamClient {
         cancel: cancel,
       ),
     );
-    if (!res.ok) {
-      final code = res.statusCode;
-      final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
-      if (code == 401 || code == 403) throw XtAuthError(msg);
-      if (code == 451) throw XtPortalBlockedError(msg);
-      throw XtNetworkError(msg);
-    }
+    if (!res.ok) _raiseHttp(url, res.statusCode);
     yield* parseXmltv(Stream<List<int>>.value(res.bodyBytes));
   }
 }
