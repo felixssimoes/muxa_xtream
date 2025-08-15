@@ -44,7 +44,7 @@ class XtreamClient {
   }
 
   Never _raiseHttp(Uri url, int code) {
-    final msg = 'HTTP $code for ${Redactor.redactUrl(url.toString())}';
+    final msg = 'HTTP $code ${Redactor.redactUrl(url.toString())}';
     if (code == 401 || code == 403) throw XtAuthError(msg);
     if (code == 451) throw XtPortalBlockedError(msg);
     throw XtNetworkError(msg);

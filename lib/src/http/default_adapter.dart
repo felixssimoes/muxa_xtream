@@ -133,25 +133,37 @@ class XtDefaultHttpAdapter implements XtHttpAdapter {
       );
     } on XtCancelledError catch (err, st) {
       throw XtNetworkError(
-        'Cancelled ${Redactor.redactUrl(url.toString())}',
+        'Cancelled [${request.method.name.toUpperCase()}] ${Redactor.redactUrl(url.toString())}',
         cause: err,
         stackTrace: st,
       );
     } on TimeoutException catch (err, st) {
       throw XtNetworkError(
-        'Timeout contacting ${Redactor.redactUrl(url.toString())}',
+        'Timeout [${request.method.name.toUpperCase()}] ${Redactor.redactUrl(url.toString())}',
+        cause: err,
+        stackTrace: st,
+      );
+    } on HandshakeException catch (err, st) {
+      throw XtNetworkError(
+        'TLS handshake failed [${request.method.name.toUpperCase()}] ${Redactor.redactUrl(url.toString())}',
+        cause: err,
+        stackTrace: st,
+      );
+    } on SocketException catch (err, st) {
+      throw XtNetworkError(
+        'Socket error [${request.method.name.toUpperCase()}] ${Redactor.redactUrl(url.toString())}',
         cause: err,
         stackTrace: st,
       );
     } on IOException catch (err, st) {
       throw XtNetworkError(
-        'Network error for ${Redactor.redactUrl(url.toString())}',
+        'I/O error [${request.method.name.toUpperCase()}] ${Redactor.redactUrl(url.toString())}',
         cause: err,
         stackTrace: st,
       );
     } catch (err, st) {
       throw XtNetworkError(
-        'Unexpected network error for ${Redactor.redactUrl(url.toString())}',
+        'Unexpected network error [${request.method.name.toUpperCase()}] ${Redactor.redactUrl(url.toString())}',
         cause: err,
         stackTrace: st,
       );
