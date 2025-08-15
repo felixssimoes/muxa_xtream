@@ -56,7 +56,7 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 ## Phase 9 — Documentation — Status: `todo`
 - [ ] Update README (quick start, examples, capability notes)
 - [ ] Add dartdoc comments for public API
-- [ ] Add Troubleshooting and Security Notes; link `docs/AGENTS.md`
+- [ ] Add Troubleshooting and Security Notes; link `AGENTS.md`
 
 ## Phase 10 — Tooling & CI — Status: `todo`
 - [ ] Finalize `tool/verify.sh` and ensure local parity

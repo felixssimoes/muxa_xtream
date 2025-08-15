@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Pre-commit hook: run the project verify script and block commits on failure.
+# Install: make executable and symlink/copy to .git/hooks/pre-commit
+#   chmod +x tool/hooks/pre-commit
+#   ln -sf ../../tool/hooks/pre-commit .git/hooks/pre-commit
+
+exec bash tool/verify.sh
+

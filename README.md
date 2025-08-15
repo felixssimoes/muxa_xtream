@@ -13,7 +13,7 @@ and the Flutter guide for
 
 ## Repository Guidelines
 
-See [docs/AGENTS.md](docs/AGENTS.md) for contributor and development guidelines.
+See [AGENTS.md](AGENTS.md) for contributor and development guidelines, and [CONTRIBUTING.md](CONTRIBUTING.md) for workflow rules (verify script, commit format, examples, hooks).
 
 TODO: Put a short description of the package here that helps potential users
 know whether this package might be useful for them.

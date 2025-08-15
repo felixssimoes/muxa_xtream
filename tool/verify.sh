@@ -9,12 +9,17 @@ echo "== muxa_xtream verify =="
 
 has_cmd() { command -v "$1" >/dev/null 2>&1; }
 
-run_or_skip() {
+FAILED=0
+FAILED_TASKS=()
+
+run_task() {
   local name="$1"; shift
   if "$@"; then
     echo "✅ ${name}"
   else
-    echo "⚠️  ${name} failed (continuing)"
+    echo "❌ ${name} failed"
+    FAILED=1
+    FAILED_TASKS+=("${name}")
   fi
 }
 
@@ -32,22 +37,22 @@ echo "Tooling: using ${runner}"
 
 if [[ "${VERIFY_PUB_GET}" == "1" ]]; then
   if [[ "${runner}" == "flutter" ]]; then
-    run_or_skip "flutter pub get" flutter pub get
+    run_task "flutter pub get" flutter pub get
   else
-    run_or_skip "dart pub get" dart pub get
+    run_task "dart pub get" dart pub get
   fi
 else
   echo "Skipping pub get (set VERIFY_PUB_GET=1 to enable)"
 fi
 
 echo "Formatting..."
-run_or_skip "dart format" dart format .
+run_task "dart format" dart format .
 
 echo "Formatting check..."
-run_or_skip "dart format check" dart format --output=none --set-exit-if-changed .
+run_task "dart format check" dart format --output=none --set-exit-if-changed .
 
 echo "Static analysis..."
-run_or_skip "dart analyze" dart analyze
+run_task "dart analyze" dart analyze
 
 echo "Running tests..."
 
@@ -61,10 +66,19 @@ else
   # Prefer Dart tests for pure Dart package
   : "${VERIFY_COVERAGE:=0}"
   if [[ "${VERIFY_COVERAGE}" == "1" ]]; then
-    run_or_skip "dart test --coverage" bash -lc 'dart test --coverage=coverage'
+    run_task "dart test --coverage" bash -lc 'dart test --coverage=coverage'
   else
-    run_or_skip "dart test" dart test
+    run_task "dart test" dart test
   fi
+fi
+
+if [[ ${FAILED} -ne 0 ]]; then
+  echo ""
+  echo "Some checks failed:" >&2
+  for t in "${FAILED_TASKS[@]}"; do
+    echo " - ${t}" >&2
+  done
+  exit 1
 fi
 
 echo "All done."
