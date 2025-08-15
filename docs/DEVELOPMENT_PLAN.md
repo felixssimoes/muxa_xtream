@@ -51,7 +51,7 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Wire cancellation/timeout plumbing across client
 - [x] Centralize redaction; ensure no secrets in errors/logs
 - [ ] Polish error classification and messages
-- [ ] Add tests (cancel propagation, timeout classification, redaction)
+- [x] Add tests (cancel propagation, timeout classification, redaction)
 
 ## Phase 9 — Documentation — Status: `todo`
 - [ ] Update README (quick start, examples, capability notes)
