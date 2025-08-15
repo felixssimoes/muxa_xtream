@@ -33,6 +33,10 @@ elif ! has_cmd dart && has_cmd flutter; then
 fi
 
 echo "Tooling: using ${runner}"
+if ! has_cmd "${runner}"; then
+  echo "Error: runner '${runner}' not found in PATH" >&2
+  exit 127
+fi
 "${runner}" --version 2>/dev/null || true
 
 if [[ "${VERIFY_PUB_GET}" == "1" ]]; then

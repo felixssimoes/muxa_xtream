@@ -58,9 +58,9 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 - [x] Add dartdoc comments for public API
 - [x] Add Troubleshooting and Security Notes; link `AGENTS.md`
 
-## Phase 10 — Tooling & CI — Status: `todo`
-- [ ] Finalize `tool/verify.sh` and ensure local parity
-- [ ] Add CI workflow (format, analyze, test, coverage)
+## Phase 10 — Tooling & CI — Status: `done`
+- [x] Finalize `tool/verify.sh` and ensure local parity
+- [x] Add CI workflow (format, analyze, test, coverage)
 
 ## Phase 11 — Versioning & Release — Status: `todo`
 - [ ] Update `CHANGELOG.md`; bump version to `0.1.0`
