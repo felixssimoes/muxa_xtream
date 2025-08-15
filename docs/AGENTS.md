@@ -33,6 +33,11 @@
   - Blank line after subject.
   - Body: wrapped at ~72 cols; bullets for key changes; include “why” when helpful.
   - Prefer small scopes (e.g., `core`, `http`, `docs`, `tool`).
+  - Tip: when committing via CLI, avoid literal `\n` in `-m` strings — Git does not interpret escapes.
+    - Use multiple `-m` flags for paragraphs, or pipe a properly formatted message via stdin: `git commit -F - <<'MSG'` ... `MSG`.
+    - Example:
+      - `git commit -m "feat(url): add probe" -m "- Adds HEAD/Range probe\n- Adds tests"` (note: each `-m` is a new paragraph; for line breaks within a paragraph, prefer `-F -`).
+      - `git commit -F - <<'MSG'\nfeat(url): add probe\n\n- Adds HEAD/Range probe\n- Adds tests\nMSG`
   - Examples:
     - `chore(core): complete Phase 0 bootstrap`
       
