@@ -7,16 +7,17 @@
 - Root files: `pubspec.yaml` (deps, SDK), `analysis_options.yaml` (lints), `README.md`, `CHANGELOG.md`.
 
 ## Build, Test, and Development Commands
-- Install deps: `flutter pub get` — resolves package dependencies.
-- Run tests: `flutter test` — executes `flutter_test` suites.
-- Coverage: `flutter test --coverage` — outputs `coverage/lcov.info`.
-- Static analysis: `flutter analyze` — checks style and common issues.
+- Install deps: `dart pub get` — resolves package dependencies.
+- Run tests: `dart test` — executes test suites.
+- Coverage: `dart test --coverage=coverage` — writes VM coverage data.
+- Static analysis: `dart analyze` — checks style and common issues.
 - Format: `dart format .` — apply standard Dart formatting.
-- Publish check: `flutter pub publish --dry-run` — validates package readiness.
+- Publish check: `dart pub publish --dry-run` — validates package readiness.
 
 ## Coding Style & Naming Conventions
 - Indentation: 2 spaces, no tabs. Use `dart format`.
 - Lints: `flutter_lints` (see `analysis_options.yaml`). Fix all analyzer warnings.
+  - Analyzer must be clean: resolve all issues (including info-level) before committing. If suppression is justified, use the narrowest `// ignore:` with a rationale.
 - Files: `lowercase_with_underscores.dart` (e.g., `my_service.dart`).
 - Types: `UpperCamelCase`; members/variables: `lowerCamelCase`; constants: `SCREAMING_SNAKE_CASE`.
 - Public API lives under `lib/`; avoid exposing internals inadvertently.

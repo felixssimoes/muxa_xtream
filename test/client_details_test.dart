@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:muxa_xtream/muxa_xtream.dart';
 
 void main() {
@@ -80,7 +80,7 @@ void main() {
     await server?.close(force: true);
   });
 
-  XtreamClient _client() => XtreamClient(
+  XtreamClient makeClient() => XtreamClient(
     XtreamPortal(base),
     const XtreamCredentials(username: 'alice', password: 'secret'),
     http: XtDefaultHttpAdapter(
@@ -92,7 +92,7 @@ void main() {
   );
 
   test('getVodInfo returns details', () async {
-    final c = _client();
+    final c = makeClient();
     final d = await c.getVodInfo(77);
     expect(d.streamId, 77);
     expect(d.name, 'Movie77');
@@ -100,7 +100,7 @@ void main() {
   });
 
   test('getSeriesInfo returns details with episodes', () async {
-    final c = _client();
+    final c = makeClient();
     final s = await c.getSeriesInfo(5);
     expect(s.seriesId, 5);
     expect(s.seasons[1]!.single.title, 'Ep1');

@@ -1,16 +1,13 @@
 name: muxa_xtream
-description: "A new Flutter package project."
+description: "Xtream API client for Dart (no UI)."
 version: 0.0.1
 
 environment:
   sdk: ^3.8.1
-  flutter: ">=1.17.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
+  # No Flutter dependency; pure Dart package
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^5.0.0
+  test: ^1.25.0
+  lints: ^5.0.0

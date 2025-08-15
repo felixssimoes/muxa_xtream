@@ -19,11 +19,12 @@ run_or_skip() {
 }
 
 runner_override=${VERIFY_RUNNER:-}
-runner="flutter"
+# Default to Dart to avoid requiring Flutter devices
+runner="dart"
 if [[ -n "$runner_override" ]]; then
   runner="$runner_override"
-elif ! has_cmd flutter; then
-  runner="dart"
+elif ! has_cmd dart && has_cmd flutter; then
+  runner="flutter"
 fi
 
 echo "Tooling: using ${runner}"
@@ -46,16 +47,7 @@ echo "Formatting check..."
 run_or_skip "dart format check" dart format --output=none --set-exit-if-changed .
 
 echo "Static analysis..."
-if [[ "${runner}" == "flutter" ]]; then
-  if ! flutter analyze; then
-    echo "flutter analyze failed; attempting dart analyze fallback"
-    run_or_skip "dart analyze" dart analyze
-  else
-    echo "✅ flutter analyze"
-  fi
-else
-  run_or_skip "dart analyze" dart analyze
-fi
+run_or_skip "dart analyze" dart analyze
 
 echo "Running tests..."
 
@@ -65,32 +57,13 @@ has_tests() {
 
 if ! has_tests; then
   echo "No tests found; skipping test step."
-elif [[ "${runner}" == "flutter" ]]; then
-  # Coverage optional in bootstrap; enable via VERIFY_COVERAGE=1
+else
+  # Prefer Dart tests for pure Dart package
   : "${VERIFY_COVERAGE:=0}"
   if [[ "${VERIFY_COVERAGE}" == "1" ]]; then
-    if ! flutter test --coverage; then
-      echo "flutter test failed; attempting dart test fallback"
-      run_or_skip "dart test" dart test
-    else
-      echo "✅ flutter test --coverage"
-    fi
+    run_or_skip "dart test --coverage" bash -lc 'dart test --coverage=coverage'
   else
-    if ! flutter test; then
-      echo "flutter test failed; attempting dart test fallback"
-      run_or_skip "dart test" dart test
-    else
-      echo "✅ flutter test"
-    fi
-  fi
-else
-  # Fallback: try dart test if available
-  if has_cmd dart; then
-    if has_cmd dart && dart --version >/dev/null 2>&1; then
-      run_or_skip "dart test" dart test
-    else
-      echo "Skipping tests: dart not available."
-    fi
+    run_or_skip "dart test" dart test
   fi
 fi
 
