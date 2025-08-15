@@ -58,10 +58,17 @@
   - When all tasks in a phase are completed, set that phase status to `done`.
 - Always tick completed tasks with `- [x]` and leave remaining as `- [ ]`.
 - Update the plan in the same commit as the code/tests that fulfill a task.
- - Work style: proceed task-by-task within the current `in progress` phase.
-   - Pick the next unchecked task in the active phase and complete it end-to-end (code, tests, docs) before starting another.
-   - Avoid batching multiple tasks from the same phase in a single PR/commit unless they are trivially coupled and cannot be validated independently.
-   - Prefer one commit per task; ensure the message references the specific task.
+- Work style: proceed task-by-task within the current `in progress` phase.
+  - Pick the next unchecked task in the active phase and complete it end-to-end (code, tests, docs) before starting another.
+  - Avoid batching multiple tasks from the same phase in a single PR/commit unless they are trivially coupled and cannot be validated independently.
+  - Prefer one commit per task; ensure the message references the specific task.
+
+## Examples & Demos
+- Keep `example/` up-to-date with the public API.
+  - Every time a new public API is added or changed, update `example/main.dart` to include a minimal usage snippet that exercises it.
+  - Prefer mock-friendly flows (e.g., `--mock` flag) so examples run without external network access.
+  - Update `example/README.md` with any new flags, outputs, or steps needed to try the new API.
+  - Include the example updates and docs in the same commit as the API change.
 
 ## Security & Configuration Tips
 - Do not commit secrets or `.dart_tool/`. Respect `environment` constraints in `pubspec.yaml`.

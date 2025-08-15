@@ -24,13 +24,21 @@ TODO: List what your package can do. Maybe include images, gifs, or videos.
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+- Install Flutter SDK and run `flutter pub get` in the repo.
+- Try the example app to exercise the public API as it evolves.
+  - Mock mode (no external network):
+    - `dart run example/main.dart --mock`
+  - Real portal:
+    - `dart run example/main.dart --portal https://your.portal/ --user USER --pass PASS`
+  - The example is updated with every new API addition so you can quickly verify behavior end-to-end.
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+- See `example/main.dart` for live usage of the APIs, including:
+  - `XtreamClient.getUserAndServerInfo()`
+  - Catalogs: `getLiveCategories`, `getVodCategories`, `getSeriesCategories`, and corresponding list fetchers
+  - URL builders: `liveUrl`, `vodUrl`, `seriesUrl`
+  - Probe helper: `suggestStreamExtension`
 
 ```dart
 const like = 'sample';
