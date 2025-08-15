@@ -49,7 +49,7 @@ This document tracks implementation progress for the muxa_xtream package. Phases
 
 ## Phase 8 — Reliability & Security — Status: `in progress`
 - [x] Wire cancellation/timeout plumbing across client
-- [ ] Centralize redaction; ensure no secrets in errors/logs
+- [x] Centralize redaction; ensure no secrets in errors/logs
 - [ ] Polish error classification and messages
 - [ ] Add tests (cancel propagation, timeout classification, redaction)
 
