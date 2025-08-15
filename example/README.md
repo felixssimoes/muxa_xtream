@@ -18,6 +18,10 @@ Usage
   - `dart run example/main.dart --mock`
 
 Notes
-- The example uses the package public API: `XtreamClient.getUserAndServerInfo`, URL builders (`liveUrl`, `vodUrl`, `seriesUrl`), and `suggestStreamExtension`.
+- The example uses the package public API:
+  - Account info: `XtreamClient.getUserAndServerInfo`
+  - Catalogs: `getLiveCategories`, `getVodCategories`, `getSeriesCategories`, and fetching lists
+  - URL builders: `liveUrl`, `vodUrl`, `seriesUrl`
+  - Probe helper: `suggestStreamExtension`
+- In `--mock` mode, a local HTTP server emulates key Xtream endpoints including player_api.php actions used for catalogs.
 - Credentials are never printed in clear; URLs are redacted in logs.
-

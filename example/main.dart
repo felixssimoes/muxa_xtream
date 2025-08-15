@@ -45,7 +45,7 @@ void main(List<String> args) async {
     final info = await client.getUserAndServerInfo();
     stdout
       ..writeln('User: ${info.user.username} (active: ${info.user.active})')
-      ..writeln('expires: ${info.user.expiresAt})')
+      ..writeln('expires: ${info.user.expiresAt}')
       ..writeln('max connections: ${info.user.maxConnections}')
       ..writeln('Server: ${info.server.baseUrl} (https: ${info.server.https})');
   } on XtAuthError catch (e) {
@@ -56,6 +56,60 @@ void main(List<String> args) async {
     stderr.writeln('Error: $e');
     await mock?.close(force: true);
     exit(2);
+  }
+
+  // Fetch and print categories and a few items from each catalog
+  try {
+    stdout.writeln('Fetching catalogs...');
+
+    final liveCats = await client.getLiveCategories();
+    stdout.writeln('Live categories: ${liveCats.length}');
+    for (final c in liveCats.take(3)) {
+      stdout.writeln('  - \'${c.name}\' (id=${c.id})');
+    }
+    if (liveCats.isNotEmpty) {
+      final streams = await client.getLiveStreams(
+        categoryId: liveCats.first.id,
+      );
+      if (streams.isNotEmpty) {
+        final s = streams.first;
+        stdout.writeln(
+          'First live in ${liveCats.first.name}: \'${s.name}\' (id=${s.streamId})',
+        );
+      }
+    }
+
+    final vodCats = await client.getVodCategories();
+    stdout.writeln('VOD categories: ${vodCats.length}');
+    for (final c in vodCats.take(3)) {
+      stdout.writeln('  - \'${c.name}\' (id=${c.id})');
+    }
+    if (vodCats.isNotEmpty) {
+      final vod = await client.getVodStreams(categoryId: vodCats.first.id);
+      if (vod.isNotEmpty) {
+        final v = vod.first;
+        stdout.writeln(
+          'First VOD in ${vodCats.first.name}: \'${v.name}\' (id=${v.streamId})',
+        );
+      }
+    }
+
+    final seriesCats = await client.getSeriesCategories();
+    stdout.writeln('Series categories: ${seriesCats.length}');
+    for (final c in seriesCats.take(3)) {
+      stdout.writeln('  - \'${c.name}\' (id=${c.id})');
+    }
+    if (seriesCats.isNotEmpty) {
+      final ser = await client.getSeries(categoryId: seriesCats.first.id);
+      if (ser.isNotEmpty) {
+        final s = ser.first;
+        stdout.writeln(
+          'First series in ${seriesCats.first.name}: \'${s.name}\' (id=${s.seriesId})',
+        );
+      }
+    }
+  } on XtError catch (e) {
+    stderr.writeln('Catalog error: $e');
   }
 
   // Show URL builder examples
@@ -89,23 +143,79 @@ Future<HttpServer> _startMockServer() async {
             await req.response.close();
             continue;
           }
-          final body = jsonEncode({
-            'user_info': {
-              'username': 'alice',
-              'account_status': 'active',
-              'exp_date': '1700000000',
-              'max_connections': '2',
-              'trial': '0',
-            },
-            'server_info': {
-              'base_url': 'http://localhost:${server.port}',
-              'timezone': 'UTC',
-              'https': '0',
-            },
-          });
+          final action = qp['action'];
+          dynamic bodyObj;
+          if (action == null) {
+            bodyObj = {
+              'user_info': {
+                'username': 'alice',
+                'account_status': 'active',
+                'exp_date': '1700000000',
+                'max_connections': '2',
+                'trial': '0',
+              },
+              'server_info': {
+                'base_url': 'http://localhost:${server.port}',
+                'timezone': 'UTC',
+                'https': '0',
+              },
+            };
+          } else {
+            switch (action) {
+              case 'get_live_categories':
+                bodyObj = [
+                  {'category_id': '1', 'category_name': 'News'},
+                  {'category_id': '2', 'category_name': 'Sports'},
+                ];
+                break;
+              case 'get_vod_categories':
+                bodyObj = [
+                  {'category_id': '10', 'category_name': 'Movies'},
+                  {'category_id': '11', 'category_name': 'Documentary'},
+                ];
+                break;
+              case 'get_series_categories':
+                bodyObj = [
+                  {'category_id': '20', 'category_name': 'Shows'},
+                ];
+                break;
+              case 'get_live_streams':
+                final cat = qp['category_id'] ?? '1';
+                bodyObj = [
+                  {
+                    'stream_id': 12,
+                    'name': 'Channel A',
+                    'category_id': cat,
+                    'stream_icon': 'http://logo',
+                  },
+                ];
+                break;
+              case 'get_vod_streams':
+                final cat = qp['category_id'] ?? '10';
+                bodyObj = [
+                  {
+                    'stream_id': 77,
+                    'name': 'Movie',
+                    'category_id': cat,
+                    'cover_big': 'http://img',
+                  },
+                ];
+                break;
+              case 'get_series':
+                final cat = qp['category_id'] ?? '20';
+                bodyObj = [
+                  {'series_id': '5', 'name': 'Show', 'category_id': cat},
+                ];
+                break;
+              default:
+                req.response.statusCode = 400;
+                await req.response.close();
+                continue;
+            }
+          }
           req.response.statusCode = 200;
           req.response.headers.set('Content-Type', 'application/json');
-          req.response.write(body);
+          req.response.write(jsonEncode(bodyObj));
           await req.response.close();
         } else if (path == '/hls.m3u8') {
           req.response.headers.set(
