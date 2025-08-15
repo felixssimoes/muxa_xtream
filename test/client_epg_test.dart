@@ -29,15 +29,20 @@ void main() {
           final action = qp['action'];
           if (action == 'get_short_epg') {
             final now = DateTime.now().toUtc();
-            final body = [
-              {
-                'epg_channel_id': 'ch.a',
-                'start': now.toIso8601String(),
-                'end': now.add(const Duration(hours: 1)).toIso8601String(),
-                'title': 'News',
-                'description': 'daily news',
-              },
-            ];
+            final hasEpgId = qp.containsKey('epg_channel_id');
+            final body = hasEpgId
+                ? [
+                    {
+                      'epg_channel_id': qp['epg_channel_id'],
+                      'start': now.toIso8601String(),
+                      'end': now
+                          .add(const Duration(hours: 1))
+                          .toIso8601String(),
+                      'title': 'News',
+                      'description': 'daily news',
+                    },
+                  ]
+                : [];
             req.response.statusCode = 200;
             req.response.headers.set('Content-Type', 'application/json');
             req.response.write(jsonEncode(body));
@@ -66,9 +71,9 @@ void main() {
     ),
   );
 
-  test('getShortEpg returns entries', () async {
+  test('getShortEpg returns entries with epgChannelId', () async {
     final c = makeClient();
-    final epg = await c.getShortEpg(streamId: 12, limit: 1);
+    final epg = await c.getShortEpg(epgChannelId: 'ch.a', limit: 1);
     expect(epg.length, 1);
     expect(epg.first.title, 'News');
     expect(epg.first.startUtc.isUtc, isTrue);

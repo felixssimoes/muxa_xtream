@@ -68,19 +68,25 @@ void main(List<String> args) async {
       stdout.writeln('  - \'${c.name}\' (id=${c.id})');
     }
     if (liveCats.isNotEmpty) {
-      final streams = await client.getLiveStreams(
-        categoryId: liveCats.first.id,
-      );
+      final category = liveCats[1];
+      final streams = await client.getLiveStreams(categoryId: category.id);
       if (streams.isNotEmpty) {
         final s = streams.first;
         stdout.writeln(
-          'First live in ${liveCats.first.name}: \'${s.name}\' (id=${s.streamId})',
+          'First live in ${category.name}: \'${s.name}\' (id=${s.streamId})',
         );
+        // Most portals work with streamId for short EPG. If a channel
+        // returns empty, it may require epg_channel_id; our client will
+        // retry internally when both are provided.
         final epg = await client.getShortEpg(streamId: s.streamId, limit: 2);
-        for (final e in epg) {
-          stdout.writeln(
-            '  EPG: ${e.startUtc.toIso8601String()} - ${e.endUtc.toIso8601String()} \'${e.title}\'',
-          );
+        if (epg.isEmpty) {
+          stdout.writeln('  No EPG data available');
+        } else {
+          for (final e in epg) {
+            stdout.writeln(
+              '  EPG: ${e.startUtc.toIso8601String()} - ${e.endUtc.toIso8601String()} \'${e.title}\'',
+            );
+          }
         }
       }
     }

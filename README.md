@@ -24,7 +24,7 @@ TODO: List what your package can do. Maybe include images, gifs, or videos.
 
 ## Getting started
 
-- Install Flutter SDK and run `flutter pub get` in the repo.
+- Install Dart SDK and run `dart pub get` in the repo.
 - Try the example app to exercise the public API as it evolves.
   - Mock mode (no external network):
     - `dart run example/main.dart --mock`
@@ -37,6 +37,11 @@ TODO: List what your package can do. Maybe include images, gifs, or videos.
 - See `example/main.dart` for live usage of the APIs, including:
   - `XtreamClient.getUserAndServerInfo()`
   - Catalogs: `getLiveCategories`, `getVodCategories`, `getSeriesCategories`, and corresponding list fetchers
+  - Details: `getVodInfo`, `getSeriesInfo`
+  - EPG: `getShortEpg(streamId, limit)`
+    - Note: some portals serve EPG only by `epg_channel_id` (not by `stream_id`).
+      The client API also accepts `epgChannelId` and, when both are provided, retries internally if the `stream_id` query returns empty.
+  - Diagnostics: `ping()` and `capabilities()`
   - URL builders: `liveUrl`, `vodUrl`, `seriesUrl`
   - Probe helper: `suggestStreamExtension`
 

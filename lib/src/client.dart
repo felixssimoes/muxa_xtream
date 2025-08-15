@@ -189,27 +189,50 @@ class XtreamClient {
   }
 
   /// Short EPG for a live stream.
+  /// Some portals require `epg_channel_id` instead of `stream_id`.
+  /// Provide either [epgChannelId] or [streamId] (prefer [epgChannelId] when known).
   Future<List<XtEpgEntry>> getShortEpg({
-    required int streamId,
+    int? streamId,
+    String? epgChannelId,
     int limit = 10,
   }) async {
-    final data = await _getAction(
-      'get_short_epg',
-      extra: {'stream_id': '$streamId', 'limit': '$limit'},
-    );
-    List? list;
-    if (data is List) {
-      list = data;
-    } else if (data is Map<String, dynamic>) {
-      list = data['epg_listings'] ?? data['listings'] ?? data['results'];
+    if (streamId == null && (epgChannelId == null || epgChannelId.isEmpty)) {
+      throw const XtUnsupportedError(
+        'getShortEpg requires streamId or epgChannelId',
+      );
     }
-    if (list is List) {
-      return list
-          .whereType<Map<String, dynamic>>()
-          .map(XtEpgEntry.fromJson)
-          .toList(growable: false);
+
+    Future<List<XtEpgEntry>> fetchEpg(Map<String, String> q) async {
+      final data = await _getAction('get_short_epg', extra: q);
+      List? list;
+      if (data is List) {
+        list = data;
+      } else if (data is Map<String, dynamic>) {
+        list = data['epg_listings'] ?? data['listings'] ?? data['results'];
+      }
+      if (list is List) {
+        return list
+            .whereType<Map<String, dynamic>>()
+            .map(XtEpgEntry.fromJson)
+            .toList(growable: false);
+      }
+      throw const XtParseError('Expected list for short EPG');
     }
-    throw const XtParseError('Expected list for short EPG');
+
+    // Try streamId first if provided. If empty and epgChannelId is available, retry with it.
+    if (streamId != null) {
+      final first = await fetchEpg({
+        'stream_id': '$streamId',
+        'limit': '$limit',
+      });
+      if (first.isNotEmpty || epgChannelId == null || epgChannelId.isEmpty) {
+        return first;
+      }
+      return fetchEpg({'epg_channel_id': epgChannelId, 'limit': '$limit'});
+    }
+
+    // Only epgChannelId provided
+    return fetchEpg({'epg_channel_id': epgChannelId!, 'limit': '$limit'});
   }
 
   Future<dynamic> _getAction(
