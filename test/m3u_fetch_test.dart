@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
@@ -33,7 +34,7 @@ void main() {
               '${base.replace(path: '/live/2.ts')}\n';
           req.response.statusCode = 200;
           req.response.headers.set('Content-Type', 'application/x-mpegurl');
-          req.response.write(playlist);
+          await req.response.addStream(Stream.value(utf8.encode(playlist)));
           await req.response.close();
         } catch (_) {}
       }

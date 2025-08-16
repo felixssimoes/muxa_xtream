@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 
 import '../core/errors.dart';
 import '../core/cancellation.dart';
@@ -113,14 +112,6 @@ class XtDefaultHttpAdapter implements XtHttpAdapter {
             ]);
 
       final resp = await guarded.timeout(timeout);
-      final bytes = await resp.fold<BytesBuilder>(BytesBuilder(copy: false), (
-        builder,
-        data,
-      ) {
-        builder.add(data);
-        return builder;
-      });
-      final body = bytes.takeBytes();
       final hdrs = <String, String>{};
       resp.headers.forEach((name, values) {
         if (values.isNotEmpty) hdrs[name] = values.join(',');
@@ -128,7 +119,7 @@ class XtDefaultHttpAdapter implements XtHttpAdapter {
       return XtResponse(
         statusCode: resp.statusCode,
         headers: hdrs,
-        bodyBytes: body,
+        body: resp,
         url: resp.redirects.isNotEmpty ? resp.redirects.last.location : url,
       );
     } on XtCancelledError catch (err, st) {

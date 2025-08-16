@@ -16,6 +16,6 @@ This document outlines a plan for improving the `muxa_xtream` codebase. The task
 
 ## Phase 2: Advanced Improvements
 
-- [ ] **4. Streamline `getM3u` and `getXmltv`:**
-  - [ ] Modify the `XtHttpAdapter` interface to expose the response body as a `Stream<List<int>>`.
-  - [ ] Update the `getM3u` and `getXmltv` methods to stream the response body directly to the respective parsers, removing the need for `async*` and improving memory efficiency.
+- [x] **4. Streamline `getM3u` and `getXmltv`:**
+  - [x] Modify the `XtHttpAdapter` interface to expose the response body as a `Stream<List<int>>`.
+  - [x] Update the `getM3u` and `getXmltv` methods to stream the response body directly to the respective parsers, removing the need for `async*` and improving memory efficiency.

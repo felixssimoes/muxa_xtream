@@ -353,7 +353,9 @@ Future<HttpServer> _startMockServer() async {
           }
           req.response.statusCode = 200;
           req.response.headers.set('Content-Type', 'application/json');
-          req.response.write(jsonEncode(bodyObj));
+          req.response.addStream(
+            Stream.value(utf8.encode(jsonEncode(bodyObj))),
+          );
           await req.response.close();
         } else if (path.endsWith('/get.php')) {
           final qp = req.uri.queryParameters;
@@ -371,7 +373,7 @@ Future<HttpServer> _startMockServer() async {
               '${base.replace(path: '/live/2.ts')}\n';
           req.response.statusCode = 200;
           req.response.headers.set('Content-Type', 'application/x-mpegurl');
-          req.response.write(playlist);
+          req.response.addStream(Stream.value(utf8.encode(playlist)));
           await req.response.close();
         } else if (path.endsWith('/xmltv.php')) {
           final qp = req.uri.queryParameters;
@@ -390,7 +392,7 @@ Future<HttpServer> _startMockServer() async {
               '</tv>';
           req.response.statusCode = 200;
           req.response.headers.set('Content-Type', 'application/xml');
-          req.response.write(xml);
+          req.response.addStream(Stream.value(utf8.encode(xml)));
           await req.response.close();
         } else if (path == '/hls.m3u8') {
           req.response.headers.set(
@@ -398,12 +400,12 @@ Future<HttpServer> _startMockServer() async {
             'application/vnd.apple.mpegurl',
           );
           req.response.statusCode = 200;
-          req.response.write('#EXTM3U');
+          req.response.addStream(Stream.value(utf8.encode('#EXTM3U')));
           await req.response.close();
         } else if (path == '/video.ts') {
           req.response.headers.set('Content-Type', 'video/mp2t');
           req.response.statusCode = 206; // support range probe
-          req.response.write('x');
+          req.response.addStream(Stream.value(utf8.encode('x')));
           await req.response.close();
         } else {
           req.response.statusCode = 404;

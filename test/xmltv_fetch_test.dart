@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
@@ -35,7 +36,7 @@ void main() {
               '</tv>';
           req.response.statusCode = 200;
           req.response.headers.set('Content-Type', 'application/xml');
-          req.response.write(body);
+          await req.response.addStream(Stream.value(utf8.encode(body)));
           await req.response.close();
         } catch (_) {}
       }

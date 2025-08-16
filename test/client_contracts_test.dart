@@ -39,7 +39,9 @@ void main() {
           if (user == 'html') {
             req.response.statusCode = 200;
             req.response.headers.set('Content-Type', 'text/html');
-            req.response.write('<html>oops</html>');
+            await req.response.addStream(
+              Stream.value(utf8.encode('<html>oops</html>')),
+            );
             await req.response.close();
             continue;
           }
@@ -64,7 +66,9 @@ void main() {
             );
             req.response.statusCode = 200;
             req.response.headers.set('Content-Type', 'application/json');
-            req.response.write(jsonEncode(list));
+            await req.response.addStream(
+              Stream.value(utf8.encode(jsonEncode(list))),
+            );
             await req.response.close();
           } else if (action == 'get_live_categories') {
             final body = [
@@ -72,7 +76,9 @@ void main() {
             ];
             req.response.statusCode = 200;
             req.response.headers.set('Content-Type', 'application/json');
-            req.response.write(jsonEncode(body));
+            await req.response.addStream(
+              Stream.value(utf8.encode(jsonEncode(body))),
+            );
             await req.response.close();
           } else {
             req.response.statusCode = 400;

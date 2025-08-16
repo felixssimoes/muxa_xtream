@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import '../core/errors.dart';
@@ -44,18 +45,24 @@ class XtRequest {
 class XtResponse {
   final int statusCode;
   final Map<String, String> headers;
-  final Uint8List bodyBytes;
+  final Stream<List<int>> body;
   final Uri url; // Final URL after redirects
 
   const XtResponse({
     required this.statusCode,
     required this.headers,
-    required this.bodyBytes,
+    required this.body,
     required this.url,
   });
 
   /// True when [statusCode] is in the 2xx range.
   bool get ok => statusCode >= 200 && statusCode < 300;
+
+  /// Collects the response body into a single byte list.
+  Future<Uint8List> get bodyBytes async {
+    final chunks = await body.toList();
+    return Uint8List.fromList(chunks.expand((x) => x).toList());
+  }
 }
 
 /// Adapter interface to abstract platform HTTP stacks.

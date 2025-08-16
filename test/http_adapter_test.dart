@@ -78,7 +78,7 @@ void main() {
         XtRequest(url: url, headers: {'X-Test': 'yes'}),
       );
       expect(res.ok, isTrue);
-      final body = utf8.decode(res.bodyBytes);
+      final body = utf8.decode(await res.bodyBytes);
       expect(body, 'X-Test:yes');
     });
 
@@ -89,7 +89,7 @@ void main() {
       );
       final res = await adapter.get(XtRequest(url: url));
       expect(res.ok, isTrue);
-      expect(utf8.decode(res.bodyBytes), 'ok');
+      expect(utf8.decode(await res.bodyBytes), 'ok');
       expect(res.url.path, '/dest');
     });
 

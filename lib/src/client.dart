@@ -50,7 +50,7 @@ class XtreamClient {
     );
     try {
       final map =
-          jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+          jsonDecode(utf8.decode(await res.bodyBytes)) as Map<String, dynamic>;
       final userMap = map['user_info'] as Map<String, dynamic>?;
       final serverMap = map['server_info'] as Map<String, dynamic>?;
       if (userMap == null || serverMap == null) {
@@ -315,7 +315,7 @@ class XtreamClient {
       cancel: cancel,
     );
     // Stream-parse the playlist
-    yield* parseM3u(Stream<List<int>>.value(res.bodyBytes));
+    yield* parseM3u(res.body);
   }
 
   /// Fetches XMLTV feed from `xmltv.php` and returns a stream of events.
@@ -328,7 +328,7 @@ class XtreamClient {
       accept: 'application/xml, text/xml;q=0.9, */*;q=0.1',
       cancel: cancel,
     );
-    yield* parseXmltv(Stream<List<int>>.value(res.bodyBytes));
+    yield* parseXmltv(res.body);
   }
 
   // Private helpers
@@ -389,7 +389,7 @@ class XtreamClient {
       cancel: cancel,
     );
     try {
-      return jsonDecode(utf8.decode(res.bodyBytes));
+      return jsonDecode(utf8.decode(await res.bodyBytes));
     } catch (err, st) {
       throw XtParseError(
         'Invalid JSON from ${Redactor.redactUrl(res.url.toString())}',
