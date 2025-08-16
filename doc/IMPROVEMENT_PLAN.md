@@ -1,0 +1,21 @@
+# Improvement Plan
+
+This document outlines a plan for improving the `muxa_xtream` codebase. The tasks are ordered to be worked on sequentially.
+
+## Phase 1: Refactoring and Code Quality
+
+- [ ] **1. Centralize HTTP Request Logic:**
+  - [ ] Create a private `_sendRequest` helper method in `lib/src/client.dart` to encapsulate common HTTP request logic (URL building, logging, request creation, sending, and response handling).
+  - [ ] Refactor `getUserAndServerInfo`, `_getAction`, `ping`, `getM3u`, and `getXmltv` to use the new `_sendRequest` method.
+
+- [ ] **2. Simplify `getShortEpg` Retry Logic:**
+  - [ ] Refactor the `getShortEpg` method in `lib/src/client.dart` to make the retry logic for `streamId` and `epgChannelId` more linear and easier to read.
+
+- [ ] **3. Improve `capabilities` Error Handling:**
+  - [ ] Modify the `capabilities` method in `lib/src/client.dart` to log any caught errors before returning the default `XtCapabilities` object.
+
+## Phase 2: Advanced Improvements
+
+- [ ] **4. Streamline `getM3u` and `getXmltv`:**
+  - [ ] Modify the `XtHttpAdapter` interface to expose the response body as a `Stream<List<int>>`.
+  - [ ] Update the `getM3u` and `getXmltv` methods to stream the response body directly to the respective parsers, removing the need for `async*` and improving memory efficiency.
