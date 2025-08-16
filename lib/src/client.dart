@@ -39,40 +39,15 @@ class XtreamClient {
   }) : options = options ?? const XtreamClientOptions(),
        http = http ?? createDefaultHttpAdapter();
 
-  void _log(String prefix, Uri url) {
-    logger?.info('$prefix ${Redactor.redactUrl(url.toString())}');
-  }
-
-  Never _raiseHttp(Uri url, int code) {
-    final msg = 'HTTP $code ${Redactor.redactUrl(url.toString())}';
-    if (code == 401 || code == 403) throw XtAuthError(msg);
-    if (code == 451) throw XtPortalBlockedError(msg);
-    throw XtNetworkError(msg);
-  }
-
   /// Fetches account and server info from `player_api.php`.
   Future<XtUserAndServerInfo> getUserAndServerInfo({
     XtCancellationToken? cancel,
   }) async {
-    final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
-      queryParameters: {'username': creds.username, 'password': creds.password},
+    final res = await _sendRequest(
+      logPrefix: 'GET',
+      path: ['player_api.php'],
+      cancel: cancel,
     );
-    _log('GET', url);
-
-    final res = await http.get(
-      XtRequest(
-        url: url,
-        headers: {
-          if (options.userAgent != null) 'User-Agent': options.userAgent!,
-          ...options.defaultHeaders,
-        },
-        timeout: options.receiveTimeout,
-        cancel: cancel,
-      ),
-    );
-
-    if (!res.ok) _raiseHttp(url, res.statusCode);
-
     try {
       final map =
           jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
@@ -88,7 +63,7 @@ class XtreamClient {
       rethrow;
     } catch (err, st) {
       throw XtParseError(
-        'Invalid JSON from ${Redactor.redactUrl(url.toString())}',
+        'Invalid JSON from ${Redactor.redactUrl(res.url.toString())}',
         cause: err,
         stackTrace: st,
       );
@@ -99,7 +74,7 @@ class XtreamClient {
   Future<List<XtCategory>> getLiveCategories({
     XtCancellationToken? cancel,
   }) async {
-    final data = await _getAction('get_live_categories', cancel: cancel);
+    final data = await _getJson('get_live_categories', cancel: cancel);
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
@@ -113,7 +88,7 @@ class XtreamClient {
   Future<List<XtCategory>> getVodCategories({
     XtCancellationToken? cancel,
   }) async {
-    final data = await _getAction('get_vod_categories', cancel: cancel);
+    final data = await _getJson('get_vod_categories', cancel: cancel);
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
@@ -127,7 +102,7 @@ class XtreamClient {
   Future<List<XtCategory>> getSeriesCategories({
     XtCancellationToken? cancel,
   }) async {
-    final data = await _getAction('get_series_categories', cancel: cancel);
+    final data = await _getJson('get_series_categories', cancel: cancel);
     if (data is List) {
       return data
           .whereType<Map<String, dynamic>>()
@@ -142,7 +117,7 @@ class XtreamClient {
     String? categoryId,
     XtCancellationToken? cancel,
   }) async {
-    final data = await _getAction(
+    final data = await _getJson(
       'get_live_streams',
       extra: {if (categoryId != null) 'category_id': categoryId},
       cancel: cancel,
@@ -161,7 +136,7 @@ class XtreamClient {
     String? categoryId,
     XtCancellationToken? cancel,
   }) async {
-    final data = await _getAction(
+    final data = await _getJson(
       'get_vod_streams',
       extra: {if (categoryId != null) 'category_id': categoryId},
       cancel: cancel,
@@ -180,7 +155,7 @@ class XtreamClient {
     String? categoryId,
     XtCancellationToken? cancel,
   }) async {
-    final data = await _getAction(
+    final data = await _getJson(
       'get_series',
       extra: {if (categoryId != null) 'category_id': categoryId},
       cancel: cancel,
@@ -199,7 +174,7 @@ class XtreamClient {
     int vodId, {
     XtCancellationToken? cancel,
   }) async {
-    final data = await _getAction(
+    final data = await _getJson(
       'get_vod_info',
       extra: {'vod_id': '$vodId'},
       cancel: cancel,
@@ -215,7 +190,7 @@ class XtreamClient {
     int seriesId, {
     XtCancellationToken? cancel,
   }) async {
-    final data = await _getAction(
+    final data = await _getJson(
       'get_series_info',
       extra: {'series_id': '$seriesId'},
       cancel: cancel,
@@ -241,110 +216,70 @@ class XtreamClient {
       );
     }
 
-    Future<List<XtEpgEntry>> fetchEpg(Map<String, String> params) async {
-      final data = await _getAction(
+    final Map<String, String> params = {'limit': '$limit'};
+    if (streamId != null) {
+      params['stream_id'] = '$streamId';
+    } else {
+      params['epg_channel_id'] = epgChannelId!;
+    }
+
+    final data = await _getJson('get_short_epg', extra: params, cancel: cancel);
+
+    List? list;
+    if (data is List) {
+      list = data;
+    } else if (data is Map<String, dynamic>) {
+      list = data['epg_listings'] ?? data['listings'] ?? data['results'];
+    }
+
+    if (list is List) {
+      final entries = list
+          .whereType<Map<String, dynamic>>()
+          .map(XtEpgEntry.fromJson)
+          .toList(growable: false);
+
+      if (entries.isNotEmpty ||
+          streamId == null ||
+          epgChannelId == null ||
+          epgChannelId.isEmpty) {
+        return entries;
+      }
+    }
+
+    // Retry with epgChannelId if streamId returned empty results
+    if (streamId != null && epgChannelId != null && epgChannelId.isNotEmpty) {
+      final data = await _getJson(
         'get_short_epg',
-        extra: params,
+        extra: {'epg_channel_id': epgChannelId, 'limit': '$limit'},
         cancel: cancel,
       );
-      List? list;
       if (data is List) {
-        list = data;
-      } else if (data is Map<String, dynamic>) {
-        list = data['epg_listings'] ?? data['listings'] ?? data['results'];
-      }
-      if (list is List) {
-        return list
+        return data
             .whereType<Map<String, dynamic>>()
             .map(XtEpgEntry.fromJson)
             .toList(growable: false);
       }
-      throw const XtParseError('Expected list for short EPG');
     }
 
-    // Try streamId first if provided. If empty and epgChannelId is available, retry with it.
-    if (streamId != null) {
-      final first = await fetchEpg({
-        'stream_id': '$streamId',
-        'limit': '$limit',
-      });
-      if (first.isNotEmpty || epgChannelId == null || epgChannelId.isEmpty) {
-        return first;
-      }
-      return fetchEpg({'epg_channel_id': epgChannelId, 'limit': '$limit'});
-    }
-
-    // Only epgChannelId provided
-    return fetchEpg({'epg_channel_id': epgChannelId!, 'limit': '$limit'});
-  }
-
-  Future<dynamic> _getAction(
-    String action, {
-    Map<String, String>? extra,
-    XtCancellationToken? cancel,
-  }) async {
-    final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
-      queryParameters: {
-        'username': creds.username,
-        'password': creds.password,
-        'action': action,
-        ...?extra,
-      },
-    );
-    _log('GET', url);
-    final res = await http.get(
-      XtRequest(
-        url: url,
-        headers: {
-          if (options.userAgent != null) 'User-Agent': options.userAgent!,
-          ...options.defaultHeaders,
-          'Accept': 'application/json',
-        },
-        timeout: options.receiveTimeout,
-        cancel: cancel,
-      ),
-    );
-    if (!res.ok) _raiseHttp(url, res.statusCode);
-    try {
-      return jsonDecode(utf8.decode(res.bodyBytes));
-    } catch (err, st) {
-      throw XtParseError(
-        'Invalid JSON from ${Redactor.redactUrl(url.toString())}',
-        cause: err,
-        stackTrace: st,
-      );
-    }
+    return const [];
   }
 
   /// Ping the portal by calling player_api.php (auth check) and measuring latency.
   Future<XtHealth> ping({XtCancellationToken? cancel}) async {
     final started = DateTime.now();
-    final url = _buildPath(portal.baseUri, ['player_api.php']).replace(
-      queryParameters: {'username': creds.username, 'password': creds.password},
-    );
-    _log('PING', url);
-    final res = await http.get(
-      XtRequest(
-        url: url,
-        headers: {
-          if (options.userAgent != null) 'User-Agent': options.userAgent!,
-          ...options.defaultHeaders,
-          'Accept': 'application/json',
-        },
-        timeout: options.receiveTimeout,
-        cancel: cancel,
-      ),
+    final res = await _sendRequest(
+      logPrefix: 'PING',
+      path: ['player_api.php'],
+      cancel: cancel,
     );
     final latency = DateTime.now().difference(started);
-    final ok = res.ok;
-    if (!ok) _raiseHttp(url, res.statusCode);
-    return XtHealth(ok: ok, statusCode: res.statusCode, latency: latency);
+    return XtHealth(ok: res.ok, statusCode: res.statusCode, latency: latency);
   }
 
   /// Fetch server capabilities if available (tolerates missing endpoint with sane defaults).
   Future<XtCapabilities> capabilities() async {
     try {
-      final data = await _getAction('get_server_capabilities');
+      final data = await _getJson('get_server_capabilities');
       if (data is Map<String, dynamic>) {
         return XtCapabilities.fromJson(data);
       }
@@ -358,8 +293,8 @@ class XtreamClient {
       rethrow;
     } on XtAuthError {
       rethrow;
-    } catch (_) {
-      // Fall through to defaults below
+    } catch (err, st) {
+      logger?.warn('Failed to parse capabilities, using defaults: $err\n$st');
     }
     return const XtCapabilities();
   }
@@ -371,29 +306,14 @@ class XtreamClient {
     String output = 'hls',
     XtCancellationToken? cancel,
   }) async* {
-    final url = _buildPath(portal.baseUri, ['get.php']).replace(
-      queryParameters: {
-        'username': creds.username,
-        'password': creds.password,
-        'type': 'm3u_plus',
-        'output': output,
-      },
+    final res = await _sendRequest(
+      logPrefix: 'GET',
+      path: ['get.php'],
+      query: {'type': 'm3u_plus', 'output': output},
+      accept:
+          'application/x-mpegURL, audio/mpegurl, text/plain;q=0.5, */*;q=0.1',
+      cancel: cancel,
     );
-    _log('GET', url);
-    final res = await http.get(
-      XtRequest(
-        url: url,
-        headers: {
-          if (options.userAgent != null) 'User-Agent': options.userAgent!,
-          ...options.defaultHeaders,
-          'Accept':
-              'application/x-mpegURL, audio/mpegurl, text/plain;q=0.5, */*;q=0.1',
-        },
-        timeout: options.receiveTimeout,
-        cancel: cancel,
-      ),
-    );
-    if (!res.ok) _raiseHttp(url, res.statusCode);
     // Stream-parse the playlist
     yield* parseM3u(Stream<List<int>>.value(res.bodyBytes));
   }
@@ -402,24 +322,81 @@ class XtreamClient {
   /// This is optional and depends on server support. The event stream yields
   /// channels and programmes as they are parsed.
   Stream<XtXmltvEvent> getXmltv({XtCancellationToken? cancel}) async* {
-    final url = _buildPath(portal.baseUri, ['xmltv.php']).replace(
-      queryParameters: {'username': creds.username, 'password': creds.password},
+    final res = await _sendRequest(
+      logPrefix: 'GET',
+      path: ['xmltv.php'],
+      accept: 'application/xml, text/xml;q=0.9, */*;q=0.1',
+      cancel: cancel,
     );
-    _log('GET', url);
+    yield* parseXmltv(Stream<List<int>>.value(res.bodyBytes));
+  }
+
+  // Private helpers
+
+  void _log(String prefix, Uri url) {
+    logger?.info('$prefix ${Redactor.redactUrl(url.toString())}');
+  }
+
+  Never _raiseHttp(Uri url, int code) {
+    final msg = 'HTTP $code ${Redactor.redactUrl(url.toString())}';
+    if (code == 401 || code == 403) throw XtAuthError(msg);
+    if (code == 451) throw XtPortalBlockedError(msg);
+    throw XtNetworkError(msg);
+  }
+
+  Future<XtResponse> _sendRequest({
+    required String logPrefix,
+    required List<String> path,
+    Map<String, String>? query,
+    String accept = 'application/json',
+    XtCancellationToken? cancel,
+  }) async {
+    final url = _buildPath(portal.baseUri, path).replace(
+      queryParameters: {
+        'username': creds.username,
+        'password': creds.password,
+        ...?query,
+      },
+    );
+    _log(logPrefix, url);
+
     final res = await http.get(
       XtRequest(
         url: url,
         headers: {
           if (options.userAgent != null) 'User-Agent': options.userAgent!,
           ...options.defaultHeaders,
-          'Accept': 'application/xml, text/xml;q=0.9, */*;q=0.1',
+          'Accept': accept,
         },
         timeout: options.receiveTimeout,
         cancel: cancel,
       ),
     );
+
     if (!res.ok) _raiseHttp(url, res.statusCode);
-    yield* parseXmltv(Stream<List<int>>.value(res.bodyBytes));
+    return res;
+  }
+
+  Future<dynamic> _getJson(
+    String action, {
+    Map<String, String>? extra,
+    XtCancellationToken? cancel,
+  }) async {
+    final res = await _sendRequest(
+      logPrefix: 'GET',
+      path: ['player_api.php'],
+      query: {'action': action, ...?extra},
+      cancel: cancel,
+    );
+    try {
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (err, st) {
+      throw XtParseError(
+        'Invalid JSON from ${Redactor.redactUrl(res.url.toString())}',
+        cause: err,
+        stackTrace: st,
+      );
+    }
   }
 }
 

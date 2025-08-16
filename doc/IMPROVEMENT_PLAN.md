@@ -4,15 +4,15 @@ This document outlines a plan for improving the `muxa_xtream` codebase. The task
 
 ## Phase 1: Refactoring and Code Quality
 
-- [ ] **1. Centralize HTTP Request Logic:**
-  - [ ] Create a private `_sendRequest` helper method in `lib/src/client.dart` to encapsulate common HTTP request logic (URL building, logging, request creation, sending, and response handling).
-  - [ ] Refactor `getUserAndServerInfo`, `_getAction`, `ping`, `getM3u`, and `getXmltv` to use the new `_sendRequest` method.
+- [x] **1. Centralize HTTP Request Logic:**
+  - [x] Create a private `_sendRequest` helper method in `lib/src/client.dart` to encapsulate common HTTP request logic (URL building, logging, request creation, sending, and response handling).
+  - [x] Refactor `getUserAndServerInfo`, `_getAction`, `ping`, `getM3u`, and `getXmltv` to use the new `_sendRequest` method.
 
-- [ ] **2. Simplify `getShortEpg` Retry Logic:**
-  - [ ] Refactor the `getShortEpg` method in `lib/src/client.dart` to make the retry logic for `streamId` and `epgChannelId` more linear and easier to read.
+- [x] **2. Simplify `getShortEpg` Retry Logic:**
+  - [x] Refactor the `getShortEpg` method in `lib/src/client.dart` to make the retry logic for `streamId` and `epgChannelId` more linear and easier to read.
 
-- [ ] **3. Improve `capabilities` Error Handling:**
-  - [ ] Modify the `capabilities` method in `lib/src/client.dart` to log any caught errors before returning the default `XtCapabilities` object.
+- [x] **3. Improve `capabilities` Error Handling:**
+  - [x] Modify the `capabilities` method in `lib/src/client.dart` to log any caught errors before returning the default `XtCapabilities` object.
 
 ## Phase 2: Advanced Improvements
 
