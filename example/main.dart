@@ -23,6 +23,8 @@ void main(List<String> args) async {
       receiveTimeout: const Duration(seconds: 20),
       defaultHeaders: {
         'Accept': 'application/json, text/plain;q=0.9, */*;q=0.1',
+        // Ensure the server closes the socket to avoid 15s keep-alive linger
+        'Connection': 'close',
       },
     ),
   );

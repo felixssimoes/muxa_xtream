@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'core/errors.dart';
 import 'core/logger.dart';
@@ -272,14 +273,23 @@ class XtreamClient {
       path: ['player_api.php'],
       cancel: cancel,
     );
+    // Consume and discard the response body to avoid keeping the
+    // HttpClient connection alive, which can delay process exit.
+    await res.body.drain<void>();
     final latency = DateTime.now().difference(started);
     return XtHealth(ok: res.ok, statusCode: res.statusCode, latency: latency);
   }
 
   /// Fetch server capabilities if available (tolerates missing endpoint with sane defaults).
   Future<XtCapabilities> capabilities() async {
+    XtResponse? res;
     try {
-      final data = await _getJson('get_server_capabilities');
+      res = await _sendRequest(
+        logPrefix: 'GET',
+        path: ['player_api.php'],
+        query: {'action': 'get_server_capabilities'},
+      );
+      final data = jsonDecode(utf8.decode(await res.bodyBytes));
       if (data is Map<String, dynamic>) {
         return XtCapabilities.fromJson(data);
       }
@@ -295,6 +305,11 @@ class XtreamClient {
       rethrow;
     } catch (err, st) {
       logger?.warn('Failed to parse capabilities, using defaults: $err\n$st');
+    } finally {
+      // Ensure body stream is drained if partially read
+      try {
+        await res?.body.drain<void>();
+      } catch (_) {}
     }
     return const XtCapabilities();
   }
