@@ -14,8 +14,6 @@ Usage
   - `dart run example/main.dart --portal https://your.portal/ --user USER --pass PASS`
   - Optional: `--self-signed` to allow self-signed TLS when using the default HTTP adapter.
   - Optional: `--probe URL` to test the probe helper against a specific stream URL.
-- Local mock server (no external network):
-  - `dart run example/main.dart --mock`
 
 Notes
 - The example uses the package public API:
@@ -26,5 +24,4 @@ Notes
   - Diagnostics: `ping()` and `capabilities()`
   - URL builders: `liveUrl`, `vodUrl`, `seriesUrl`
   - Probe helper: `suggestStreamExtension`
-- In `--mock` mode, a local HTTP server emulates key Xtream endpoints including player_api.php actions used for catalogs.
 - Credentials are never printed in clear; URLs are redacted in logs.

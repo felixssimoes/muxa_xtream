@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:muxa_xtream/muxa_xtream.dart';
@@ -12,17 +11,7 @@ void main(List<String> args) async {
     return;
   }
 
-  HttpServer? mock;
-  if (opts.mock) {
-    mock = await _startMockServer();
-    final base = Uri.parse('http://localhost:${mock.port}');
-    opts = opts.copyWith(
-      portal: base.toString(),
-      user: opts.user ?? 'alice',
-      pass: opts.pass ?? 'secret',
-    );
-    stdout.writeln('Mock portal at $base');
-  }
+  // No mock mode: example focuses on real portal usage.
 
   final portal = XtreamPortal.parse(opts.portal!);
   final creds = XtreamCredentials(username: opts.user!, password: opts.pass!);
@@ -50,11 +39,9 @@ void main(List<String> args) async {
       ..writeln('Server: ${info.server.baseUrl} (https: ${info.server.https})');
   } on XtAuthError catch (err) {
     stderr.writeln('Auth error: $err');
-    await mock?.close(force: true);
     exit(1);
   } on XtError catch (err) {
     stderr.writeln('Error: $err');
-    await mock?.close(force: true);
     exit(2);
   }
 
@@ -220,210 +207,12 @@ void main(List<String> args) async {
     final ext = await suggestStreamExtension(http, Uri.parse(opts.probeUrl!));
     stdout.writeln('Probed stream extension: .$ext');
   }
-
-  await mock?.close(force: true);
-}
-
-Future<HttpServer> _startMockServer() async {
-  final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-  unawaited(() async {
-    await for (final req in server) {
-      try {
-        final path = req.uri.path;
-        if (path.endsWith('/player_api.php')) {
-          final qp = req.uri.queryParameters;
-          if (qp['username'] != 'alice' || qp['password'] != 'secret') {
-            req.response.statusCode = 403;
-            await req.response.close();
-            continue;
-          }
-          final action = qp['action'];
-          dynamic bodyObj;
-          if (action == null) {
-            bodyObj = {
-              'user_info': {
-                'username': 'alice',
-                'account_status': 'active',
-                'exp_date': '1700000000',
-                'max_connections': '2',
-                'trial': '0',
-              },
-              'server_info': {
-                'base_url': 'http://localhost:${server.port}',
-                'timezone': 'UTC',
-                'https': '0',
-              },
-            };
-          } else {
-            switch (action) {
-              case 'get_live_categories':
-                bodyObj = [
-                  {'category_id': '1', 'category_name': 'News'},
-                  {'category_id': '2', 'category_name': 'Sports'},
-                ];
-                break;
-              case 'get_vod_categories':
-                bodyObj = [
-                  {'category_id': '10', 'category_name': 'Movies'},
-                  {'category_id': '11', 'category_name': 'Documentary'},
-                ];
-                break;
-              case 'get_series_categories':
-                bodyObj = [
-                  {'category_id': '20', 'category_name': 'Shows'},
-                ];
-                break;
-              case 'get_live_streams':
-                final cat = qp['category_id'] ?? '1';
-                bodyObj = [
-                  {
-                    'stream_id': 12,
-                    'name': 'Channel A',
-                    'category_id': cat,
-                    'stream_icon': 'http://logo',
-                  },
-                ];
-                break;
-              case 'get_vod_streams':
-                final cat = qp['category_id'] ?? '10';
-                bodyObj = [
-                  {
-                    'stream_id': 77,
-                    'name': 'Movie',
-                    'category_id': cat,
-                    'cover_big': 'http://img',
-                  },
-                ];
-                break;
-              case 'get_series':
-                final cat = qp['category_id'] ?? '20';
-                bodyObj = [
-                  {'series_id': '5', 'name': 'Show', 'category_id': cat},
-                ];
-                break;
-              case 'get_short_epg':
-                final now = DateTime.now().toUtc();
-                bodyObj = [
-                  {
-                    'epg_channel_id': 'ch.a',
-                    'start': now.toIso8601String(),
-                    'end': now.add(const Duration(hours: 1)).toIso8601String(),
-                    'title': 'News',
-                    'description': 'daily news',
-                  },
-                ];
-                break;
-              case 'get_vod_info':
-                final id = int.tryParse(qp['vod_id'] ?? '') ?? 0;
-                bodyObj = {
-                  'stream_id': id,
-                  'title': 'Movie$id',
-                  'plot': 'lorem',
-                  'rating': '8.0',
-                  'year': '2001',
-                  'duration': '3600',
-                  'poster': 'http://img',
-                };
-                break;
-              case 'get_series_info':
-                final id = int.tryParse(qp['series_id'] ?? '') ?? 0;
-                bodyObj = {
-                  'series_id': '$id',
-                  'name': 'Show$id',
-                  'plot': 'ipsum',
-                  'poster': 'http://img2',
-                  'episodes': {
-                    '1': [
-                      {
-                        'id': 100,
-                        'title': 'Ep1',
-                        'season': 1,
-                        'episode': 1,
-                        'duration': '1800',
-                      },
-                    ],
-                  },
-                };
-                break;
-              default:
-                req.response.statusCode = 400;
-                await req.response.close();
-                continue;
-            }
-          }
-          req.response.statusCode = 200;
-          req.response.headers.set('Content-Type', 'application/json');
-          req.response.addStream(
-            Stream.value(utf8.encode(jsonEncode(bodyObj))),
-          );
-          await req.response.close();
-        } else if (path.endsWith('/get.php')) {
-          final qp = req.uri.queryParameters;
-          if (qp['username'] != 'alice' || qp['password'] != 'secret') {
-            req.response.statusCode = 403;
-            await req.response.close();
-            continue;
-          }
-          final base = Uri.parse('http://localhost:${server.port}');
-          final playlist =
-              '#EXTM3U\n'
-              '#EXTINF:-1 tvg-id="ch1" group-title="News", Channel 1\n'
-              '${base.replace(path: '/live/1.m3u8')}\n'
-              '#EXTINF:-1, Channel 2\n'
-              '${base.replace(path: '/live/2.ts')}\n';
-          req.response.statusCode = 200;
-          req.response.headers.set('Content-Type', 'application/x-mpegurl');
-          req.response.addStream(Stream.value(utf8.encode(playlist)));
-          await req.response.close();
-        } else if (path.endsWith('/xmltv.php')) {
-          final qp = req.uri.queryParameters;
-          if (qp['username'] != 'alice' || qp['password'] != 'secret') {
-            req.response.statusCode = 403;
-            await req.response.close();
-            continue;
-          }
-          final xml =
-              '<?xml version="1.0" encoding="UTF-8"?>\n'
-              '<tv>\n'
-              '  <channel id="ch1"><display-name>One</display-name></channel>\n'
-              '  <programme start="20240101120000 +0000" channel="ch1">\n'
-              '    <title>News</title>\n'
-              '  </programme>\n'
-              '</tv>';
-          req.response.statusCode = 200;
-          req.response.headers.set('Content-Type', 'application/xml');
-          req.response.addStream(Stream.value(utf8.encode(xml)));
-          await req.response.close();
-        } else if (path == '/hls.m3u8') {
-          req.response.headers.set(
-            'Content-Type',
-            'application/vnd.apple.mpegurl',
-          );
-          req.response.statusCode = 200;
-          req.response.addStream(Stream.value(utf8.encode('#EXTM3U')));
-          await req.response.close();
-        } else if (path == '/video.ts') {
-          req.response.headers.set('Content-Type', 'video/mp2t');
-          req.response.statusCode = 206; // support range probe
-          req.response.addStream(Stream.value(utf8.encode('x')));
-          await req.response.close();
-        } else {
-          req.response.statusCode = 404;
-          await req.response.close();
-        }
-      } catch (_) {
-        // ignore mock errors
-      }
-    }
-  }());
-  return server;
 }
 
 void _printUsage() {
   stdout.writeln('''
 Usage:
   dart run example/main.dart --portal URL --user USER --pass PASS [--self-signed] [--probe URL] [--cancel-after-ms N]
-  dart run example/main.dart --mock [--probe URL] [--cancel-after-ms N]
 
 Options:
   --portal URL      Xtream portal base URL (e.g., https://host:port)
@@ -431,7 +220,6 @@ Options:
   --pass PASS       Password
   --self-signed     Allow self-signed TLS (for dev/testing)
   --probe URL       Probe a stream URL to suggest extension
-  --mock            Start a local mock portal (user=alice, pass=secret)
   --stream-id N     Stream id to use in sample URLs (default: 1)
   --cancel-after-ms N  Cancel the sample EPG request after N milliseconds
 
@@ -445,7 +233,6 @@ class _CliOptions {
   final String? pass;
   final bool selfSigned;
   final String? probeUrl;
-  final bool mock;
   final int streamId;
   final int? cancelAfterMs;
 
@@ -455,7 +242,6 @@ class _CliOptions {
     this.pass,
     this.selfSigned = false,
     this.probeUrl,
-    this.mock = false,
     this.streamId = 1,
     this.cancelAfterMs,
   });
@@ -466,7 +252,6 @@ class _CliOptions {
     String? pass,
     bool? selfSigned,
     String? probeUrl,
-    bool? mock,
     int? streamId,
     int? cancelAfterMs,
   }) => _CliOptions(
@@ -475,7 +260,6 @@ class _CliOptions {
     pass: pass ?? this.pass,
     selfSigned: selfSigned ?? this.selfSigned,
     probeUrl: probeUrl ?? this.probeUrl,
-    mock: mock ?? this.mock,
     streamId: streamId ?? this.streamId,
     cancelAfterMs: cancelAfterMs ?? this.cancelAfterMs,
   );
@@ -508,9 +292,6 @@ class _CliOptions {
           if (index + 1 >= args.length) return null;
           opts = opts.copyWith(probeUrl: args[++index]);
           break;
-        case '--mock':
-          opts = opts.copyWith(mock: true);
-          break;
         case '--stream-id':
           if (index + 1 >= args.length) return null;
           final parsedStreamId = int.tryParse(args[++index]) ?? 1;
@@ -526,10 +307,8 @@ class _CliOptions {
       }
     }
     // Validate
-    if (!opts.mock) {
-      if (opts.portal == null || opts.user == null || opts.pass == null) {
-        return null;
-      }
+    if (opts.portal == null || opts.user == null || opts.pass == null) {
+      return null;
     }
     return opts;
   }
