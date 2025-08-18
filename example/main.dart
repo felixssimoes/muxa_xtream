@@ -11,11 +11,10 @@ void main(List<String> args) async {
     return;
   }
 
-  // No mock mode: example focuses on real portal usage.
-
   final portal = XtreamPortal.parse(opts.portal!);
   final creds = XtreamCredentials(username: opts.user!, password: opts.pass!);
 
+  // optional http adapter with custom options
   final http = XtDefaultHttpAdapter(
     options: XtDefaultHttpOptions(
       allowSelfSignedTls: opts.selfSigned,
