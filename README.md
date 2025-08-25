@@ -11,16 +11,25 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/to/develop-packages).
 -->
 
+## muxa_xtream
+
+An ergonomic Dart client for Xtream Codes IPTV portals. It provides strongly-typed models, resilient HTTP, URL builders for streams, EPG helpers, and optional M3U/XMLTV utilities. Designed to be reliable, secure, and easy to integrate in Dart or Flutter apps.
+
+> Important: This package was authored as an experiment to see how far AI‑assisted engineering can go in a real-world library. The codebase, docs, tests, and design decisions were developed with heavy AI assistance and careful human review.
+
 ## Repository Guidelines
 
 See [AGENTS.md](AGENTS.md) for contributor and development guidelines, and [CONTRIBUTING.md](CONTRIBUTING.md) for workflow rules (verify script, commit format, examples, hooks).
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
-
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- Strongly-typed Xtream Codes client with clear, consistent errors
+- Pluggable HTTP adapter with timeouts, retries, redirects, TLS options
+- Cooperative cancellation support across requests and parsing
+- URL builders for live, VOD, and series (HLS first with TS fallback)
+- EPG helpers including short-EPG and channel-id fallbacks
+- M3U and XMLTV helpers for quick ingestion and parsing
+- Redaction-first logging to prevent leaking secrets
 
 ## Getting started
 
@@ -145,6 +154,7 @@ dart pub get
 
 ## Additional information
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+- Documentation: see the `doc/` folder for API notes, design, and integration guidance.
+- Example: run `dart run example/main.dart` to try common flows end-to-end.
+- Issues and contributions: please read `AGENTS.md` and `CONTRIBUTING.md`, then open issues/PRs with clear repro steps and expected behavior.
+- Security: never include credentials in issues; redact sensitive URLs or logs.
