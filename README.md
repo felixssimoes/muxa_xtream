@@ -35,10 +35,7 @@ See [AGENTS.md](AGENTS.md) for contributor and development guidelines, and [CONT
 
 - Install Dart SDK and run `dart pub get` in the repo.
 - Try the example app to exercise the public API as it evolves.
-  - Mock mode (no external network):
-    - `dart run example/main.dart --mock`
-  - Real portal:
-    - `dart run example/main.dart --portal https://your.portal/ --user USER --pass PASS`
+  - `dart run example/main.dart --portal https://your.portal/ --user USER --pass PASS`
   - The example is updated with every new API addition so you can quickly verify behavior end-to-end.
 
 ## Usage
