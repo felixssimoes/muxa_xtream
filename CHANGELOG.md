@@ -7,3 +7,8 @@ Highlights:
 - Errors: consistent taxonomy with redaction; cancellation support.
 - Optional helpers: M3U fetch + parser; streaming XMLTV parser.
 - Docs: README quick start, capability notes; public API dartdoc.
+
+## 0.1.1 — README corrections
+
+- Removed outdated `--mock` option from example instructions
+- Tweaked Getting started bullets for clarity
