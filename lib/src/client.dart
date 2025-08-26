@@ -26,14 +26,14 @@ import 'xmltv/parser.dart';
 /// High-level Xtream client for account, catalogs, details, diagnostics, and helpers.
 class XtreamClient {
   final XtreamPortal portal;
-  final XtreamCredentials creds;
+  final XtreamCredentials credentials;
   final XtHttpAdapter http;
   final XtreamLogger? logger;
   final XtreamClientOptions options;
 
   XtreamClient(
     this.portal,
-    this.creds, {
+    this.credentials, {
     XtreamClientOptions? options,
     XtHttpAdapter? http,
     this.logger,
@@ -368,8 +368,8 @@ class XtreamClient {
   }) async {
     final url = _buildPath(portal.baseUri, path).replace(
       queryParameters: {
-        'username': creds.username,
-        'password': creds.password,
+        'username': credentials.username,
+        'password': credentials.password,
         ...?query,
       },
     );
@@ -416,9 +416,9 @@ class XtreamClient {
 }
 
 Uri _buildPath(Uri base, List<String> add) {
-  final segs = <String>[
+  final segments = <String>[
     ...base.pathSegments.where((segment) => segment.isNotEmpty),
     ...add,
   ];
-  return base.replace(path: segs.join('/'));
+  return base.replace(path: segments.join('/'));
 }

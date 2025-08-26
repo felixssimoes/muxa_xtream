@@ -12,7 +12,10 @@ void main(List<String> args) async {
   }
 
   final portal = XtreamPortal.parse(opts.portal!);
-  final creds = XtreamCredentials(username: opts.user!, password: opts.pass!);
+  final credentials = XtreamCredentials(
+    username: opts.user!,
+    password: opts.pass!,
+  );
 
   // optional http adapter with custom options
   final http = XtDefaultHttpAdapter(
@@ -28,7 +31,7 @@ void main(List<String> args) async {
     ),
   );
 
-  final client = XtreamClient(portal, creds, http: http);
+  final client = XtreamClient(portal, credentials, http: http);
 
   stdout.writeln('Fetching account/server info...');
   try {
@@ -157,9 +160,9 @@ void main(List<String> args) async {
   }
 
   // Show URL builder examples
-  final live = liveUrl(portal, creds, opts.streamId);
-  final vod = vodUrl(portal, creds, opts.streamId);
-  final series = seriesUrl(portal, creds, opts.streamId);
+  final live = liveUrl(portal, credentials, opts.streamId);
+  final vod = vodUrl(portal, credentials, opts.streamId);
+  final series = seriesUrl(portal, credentials, opts.streamId);
   stdout
     ..writeln('Sample URLs for streamId=${opts.streamId}:')
     ..writeln('  live:   $live')
