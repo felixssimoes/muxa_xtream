@@ -51,8 +51,84 @@ See [AGENTS.md](AGENTS.md) for contributor and development guidelines, and [CONT
   - URL builders: `liveUrl`, `vodUrl`, `seriesUrl`
   - Probe helper: `suggestStreamExtension`
 
+### Create a client
+
 ```dart
-const like = 'sample';
+import 'package:muxa_xtream/muxa_xtream.dart';
+
+final portal = XtreamPortal.parse('https://your-portal.example:8080');
+final credentials = XtreamCredentials(username: 'USER', password: 'PASS');
+
+// Optional: pass a custom HTTP adapter or options
+final client = XtreamClient(
+  portal,
+  credentials,
+  // http: createDefaultHttpAdapter(),
+  // options: const XtreamClientOptions(receiveTimeout: Duration(seconds: 20)),
+);
+```
+
+### Account/server info
+
+```dart
+final info = await client.getUserAndServerInfo();
+print('User: ${info.user.username}, server: ${info.server.serverName}');
+```
+
+### Catalogs
+
+```dart
+final liveCats = await client.getLiveCategories();
+final vodCats = await client.getVodCategories();
+final seriesCats = await client.getSeriesCategories();
+
+final live = await client.getLiveStreams(categoryId: liveCats.first.id);
+final vod = await client.getVodStreams(categoryId: vodCats.first.id);
+final series = await client.getSeries(categoryId: seriesCats.first.id);
+```
+
+### Details
+
+```dart
+final vodDetails = await client.getVodInfo(vod.first.streamId);
+final seriesDetails = await client.getSeriesInfo(series.first.seriesId);
+```
+
+### EPG (short)
+
+```dart
+// Prefer epgChannelId when known; otherwise use streamId
+final epg = await client.getShortEpg(streamId: live.first.streamId, limit: 5);
+```
+
+### URL builders (no network I/O)
+
+```dart
+final liveHls = liveUrl(portal, credentials, live.first.streamId);
+final vodHls = vodUrl(portal, credentials, vod.first.streamId);
+final seriesHls = seriesUrl(portal, credentials, series.first.seriesId);
+```
+
+### Diagnostics
+
+```dart
+final health = await client.ping();
+final caps = await client.capabilities();
+print('Ping ok=${health.ok} ${health.latency} caps: m3u=${caps.supportsM3u}');
+```
+
+### Optional: M3U and XMLTV
+
+```dart
+// M3U entries (first 10)
+await for (final entry in client.getM3u().take(10)) {
+  print('M3U: ${entry.name} -> ${entry.url}');
+}
+
+// XMLTV: channels and programmes stream in a single sequence
+await for (final ev in client.getXmltv()) {
+  // ev is XtXmltvChannel or XtXmltvProgramme
+}
 ```
 
 ## Quick start
@@ -63,23 +139,14 @@ Use the Xtream Codes client to query account info, catalogs, details, EPG, and b
 import 'package:muxa_xtream/muxa_xtream.dart';
 
 Future<void> main() async {
-  final portal = XtreamPortal(Uri.parse('http://your-portal.example:8080'));
-  final creds = XtreamCredentials(user: 'username', pass: 'password');
+  final portal = XtreamPortal.parse('https://your-portal.example:8080');
+  final credentials = XtreamCredentials(username: 'username', password: 'password');
 
-  final client = XtreamClient(
-    portal: portal,
-    credentials: creds,
-    options: XtreamClientOptions(
-      // Tune as needed
-      requestTimeout: const Duration(seconds: 15),
-      logger: XtreamLogger.stdout(),
-    ),
-  );
+  final client = XtreamClient(portal, credentials);
 
   // Basic health
-  await client.ping();
-  final features = await client.capabilities();
-  print('Features: ${features}');
+  final health = await client.ping();
+  print('Ping: ${health.latency.inMilliseconds}ms');
 
   // Account and server
   final info = await client.getUserAndServerInfo();
@@ -87,25 +154,21 @@ Future<void> main() async {
 
   // Catalogs
   final liveCats = await client.getLiveCategories();
-  final live = await client.getLiveStreams(categoryId: liveCats.first.categoryId);
+  final live = await client.getLiveStreams(categoryId: liveCats.first.id);
   print('First live channel: ${live.first.name}');
 
   // URL builders (no I/O)
-  final hlsUrl = client.urls.liveUrl(streamId: live.first.streamId);
+  final hlsUrl = liveUrl(portal, credentials, live.first.streamId);
   print('HLS URL: $hlsUrl');
 }
 ```
 
 > Tip: prefer environment variables or a local-only config file for credentials. Avoid hard-coding secrets.
 
----
-
 ## Examples
 
 - See `example/main.dart` for a runnable demo that exercises the public API.
 - The example prints basic diagnostics and demonstrates catalogs, details, EPG, and URL builders.
-
----
 
 ## Capability notes
 
@@ -116,32 +179,11 @@ Future<void> main() async {
 - M3U & XMLTV: optional helpers for `get.php` and streaming XMLTV parse with cancellation.
 - Reliability: cancellation and timeouts propagate end-to-end.
 
----
-
-## Install
-
-Add to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  muxa_xtream: ^latest
-```
-
-Then:
-
-```sh
-dart pub get
-```
-
----
-
 ## Troubleshooting
 
 - If a call fails with an HTML response, the portal may be blocked or behind a captive page; check `XtPortalBlockedError`.
 - For 401/403, verify credentials and IP whitelist.
 - For timeouts, increase `requestTimeout` in `XtreamClientOptions` or check connectivity.
-
----
 
 ## Security
 
