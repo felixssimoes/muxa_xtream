@@ -2,12 +2,18 @@ name: muxa_xtream
 description: "Ergonomic Xtream Codes IPTV client for Dart/Flutter: typed models, resilient HTTP, URL builders, EPG, M3U/XMLTV helpers."
 version: 0.1.2
 
-environment:
-  sdk: ^3.8.1
-
 homepage: https://github.com/felixssimoes/muxa_xtream
 repository: https://github.com/felixssimoes/muxa_xtream
 issue_tracker: https://github.com/felixssimoes/muxa_xtream/issues
+
+topics:
+  - xtream
+  - iptv
+  - m3u
+  - xmltv
+
+environment:
+  sdk: ^3.8.1
 
 dependencies:
   # No Flutter dependency; pure Dart package
