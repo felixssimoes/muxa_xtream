@@ -12,3 +12,8 @@ Highlights:
 
 - Removed outdated `--mock` option from example instructions
 - Tweaked Getting started bullets for clarity
+
+## 0.1.2 — pub.dev metadata improvements
+
+- Expanded description for clarity on features and scope
+- Added `homepage`, `issue_tracker`, and `topics` to `pubspec.yaml`
